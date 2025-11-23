@@ -1,69 +1,97 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineTicket.Data;
 using OnlineTicket.Models;
+using QRCoder;
+using System.Threading.Tasks;
+using static QRCoder.QRCodeGenerator;
 
-namespace OnlineTicket.Controllers
+public class PaymentController : Controller
 {
-    [Authorize(Roles = "Customer")]
+    private readonly ApplicationDbContext _db;
 
-    public class PaymentController : Controller
+    public PaymentController(ApplicationDbContext db)
     {
-        private readonly ApplicationDbContext _db;
+        _db = db;
+    }
 
-        public PaymentController(ApplicationDbContext db)
+    public async Task<IActionResult> Create(int bookingId)
+    {
+        var booking = await _db.Bookings
+                               .Include(b => b.Event)
+                               //.Include(b => b.Payment)
+                               .ThenInclude(e => e.Venue)
+                               .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+
+        if (booking == null)
+            return NotFound();
+        ViewBag.EventTitle = booking.Event.Title;
+        ViewBag.EventImage = booking.Event.ImagePath;
+        ViewBag.VenueName = booking.Event.Venue.Name;
+        ViewBag.EventDate = booking.Event.EventDate;
+        ViewBag.EventId = booking.Event.EventId;
+        // Create a Payment object and set BookingId and Amount
+        var payment = new Payment
         {
-            _db = db;
-        }
+            BookingId = booking.BookingId,
+            Amount = booking.TotalAmount
+        };
 
-        // Show payment page
-        [HttpGet]
-        public async Task<IActionResult> Pay(int bookingId)
+
+        return View(payment);
+    }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create( Payment payment)
+    {
+        var booking = await _db.Bookings
+                                  .Include(b => b.Tickets)
+                                  .FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
+        if (booking == null) return NotFound();
+
+        var pay = new Payment
         {
-            var booking = await _db.Bookings
-                .Include(b => b.Tickets)
-                .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+            BookingId = booking.BookingId,
+            Amount = booking.TotalAmount,
+            PaymentMethod = payment.PaymentMethod,
+            CardNumber = payment.CardNumber,
+            ExpiryDate = payment.ExpiryDate,
+            CVV = payment.CVV,
+            PaymentStatus = "Paid",
+            PaymentDate = DateTime.UtcNow,
 
-            if (booking == null) return NotFound();
+           
+        };
 
-            var vm = new PaymentVM
+        _db.Payments.Add(pay);
+
+        // Update booking status
+        booking.BookingStatus = "Confirmed";
+        booking.Payment = pay;
+        // Generate tickets with QR
+        for (int i = 0; i < booking.Quantity; i++)
+        {
+            var ticket = new Ticket
             {
                 BookingId = booking.BookingId,
-                Amount = booking.TotalAmount
+                EventId = booking.EventId,
+                TicketTypeId = booking.Tickets.FirstOrDefault()?.TicketTypeId ?? 1,
+                QrBase64 = GenerateQrBase64($"Booking:{booking.BookingId}-Ticket:{i + 1}")
             };
-
-            return View(vm);
+            _db.Tickets.Add(ticket);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Pay(PaymentVM vm)
-        {
-            if (!ModelState.IsValid) return View(vm);
+        await _db.SaveChangesAsync();
 
-            string paymentReference = Guid.NewGuid().ToString(); // dummy reference
+        return RedirectToAction("MyBookings", "Booking");
+    }
 
-            var payment = new Payment
-            {
-                BookingId = vm.BookingId,
-                Amount = vm.Amount,
-                Provider = vm.Provider,
-                Reference = paymentReference,
-                PaidAt = DateTime.UtcNow
-            };
-
-            _db.Payments.Add(payment);
-
-            var booking = await _db.Bookings.FindAsync(vm.BookingId);
-            booking.PaymentStatus = "Paid";
-            booking.Payment = payment;
-
-            await _db.SaveChangesAsync();
-
-            TempData["PaymentSuccess"] = "Payment successful!";
-            return RedirectToAction("MyBookings", "Customer");
-        }
-
+    private string GenerateQrBase64(string text)
+    {
+        using var qrGenerator = new QRCodeGenerator();
+        var qrData = qrGenerator.CreateQrCode(text, ECCLevel.Q);
+        using var qrCode = new PngByteQRCode(qrData);
+        var qrBytes = qrCode.GetGraphic(20);
+        return $"data:image/png;base64,{Convert.ToBase64String(qrBytes)}";
     }
 }

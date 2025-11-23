@@ -4,18 +4,19 @@ namespace OnlineTicket.Models
 {
     public class PaymentVM
     {
-        [Required]
         public int BookingId { get; set; }
-
-        [Required]
-        [Display(Name = "Payment Method")]
-        public string Provider { get; set; } // Card, PayPal, etc.
-
-        [Required]
-        [Display(Name = "Amount to Pay")]
-        [Range(0.01, 1000000, ErrorMessage = "Amount must be positive.")]
         public decimal Amount { get; set; }
+        public string PaymentMethod { get; set; }
+        public string CardNumber { get; set; }
+        public string ExpiryDate { get; set; }
+        public string CVV { get; set; }
+        public string PaymentStatus { get; set; } = "Pending";
 
-        public string Reference { get; set; } // Generated automatically
+        public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
+        public string EventTitle { get; set; }
+        public string EventImage { get; set; }
+        public string VenueName { get; set; }
+        public DateTime EventDate { get; set; }
+
     }
 }

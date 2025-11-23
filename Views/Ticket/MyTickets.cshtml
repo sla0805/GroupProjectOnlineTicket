@@ -1,0 +1,28 @@
+﻿@model List<OnlineTicket.Models.Ticket>
+@{
+    ViewBag.Title = "My Tickets";
+}
+
+<h2>My Tickets</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Event</th>
+            <th>Ticket Type</th>
+            <th>QR Code</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var ticket in Model)
+        {
+            <tr>
+                <td>@ticket.Event.Title</td>
+                <td>@ticket.TicketType.Name</td>
+                <td>
+                    <img src="@ticket.QrBase64" alt="QR Code" width="150" height="150" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

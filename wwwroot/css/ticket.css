@@ -1,0 +1,54 @@
+﻿/* Custom styles for the table-based Ticket Listing */
+
+:root {
+    --primary-color: #1f4287;
+    --header-bg: #343a40; /* Dark gray for header */
+}
+
+/* --- Base Table & Container --- */
+.ticket-list-container {
+    border-radius: 0.75rem; /* Smoother rounding */
+}
+
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 0 !important;
+}
+
+    .table thead th {
+        /* Style the dark header to match primary color scheme */
+        background-color: var(--primary-color) !important;
+        color: white !important;
+        border-bottom: none;
+        letter-spacing: 0.5px;
+        padding: 1rem 1.25rem;
+    }
+
+    .table tbody td {
+        padding: 1rem 1.25rem;
+        border-color: #e9ecef;
+    }
+
+/* --- QR Code Thumbnail Styling --- */
+.qr-thumbnail {
+    width: 60px; /* Small size for the table cell */
+    height: 60px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+    .qr-thumbnail:hover {
+        transform: scale(1.1);
+        border-color: var(--primary-color);
+    }
+
+/* --- Modal QR Code Styling --- */
+.qr-full {
+    width: 250px;
+    height: 250px;
+    border: 5px solid #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}

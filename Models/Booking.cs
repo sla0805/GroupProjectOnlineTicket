@@ -15,9 +15,12 @@ namespace OnlineTicket.Models
         public Event Event { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        [Column(TypeName = "decimal(18,2)")]  // 
+
+        public int Quantity { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]  
         public decimal TotalAmount { get; set; }
-        public string PaymentStatus { get; set; }
+        public string BookingStatus { get; set; } = "Pending";
 
         public int? PromotionId { get; set; }
         public Promotion Promotion { get; set; }

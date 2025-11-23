@@ -95,6 +95,8 @@ namespace OnlineTicket.Controllers
             var customer = await _db.Customers
                 .Include(c => c.Bookings)
                     .ThenInclude(b => b.Event)
+                     .Include(c => c.Bookings)
+                   .ThenInclude(b => b.Tickets)
                 .FirstOrDefaultAsync(c => c.UserId == user.Id);
 
             if (customer == null)

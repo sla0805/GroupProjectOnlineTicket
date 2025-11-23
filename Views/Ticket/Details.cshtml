@@ -1,0 +1,12 @@
+﻿@model IEnumerable<OnlineTicket.Models.Ticket>
+
+<h2>My Tickets</h2>
+
+@foreach (var t in Model)
+{
+    <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+        <p>Event: @t.Booking.Event.Title</p>
+        <p>Ticket Type: @t.TicketType.Name</p>
+        <img src="@t.QrBase64" alt="Ticket QR" />
+    </div>
+}
