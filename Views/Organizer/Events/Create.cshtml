@@ -1,0 +1,96 @@
+﻿@model OnlineTicket.ViewModels.EventCreateViewModel
+@{
+    ViewData["Title"] = "Create Event";
+}
+
+<div class="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-md">
+    <h1 class="text-2xl font-bold mb-6 text-indigo-600">Create New Event</h1>
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-100 text-green-800 p-3 rounded mb-4 flex justify-between items-center">
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" class="ml-4 font-bold" onclick="this.parentElement.style.display='none'">×</button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-100 text-red-800 p-3 rounded mb-4 flex justify-between items-center">
+            <span>@TempData["ErrorMessage"]</span>
+            <button type="button" class="ml-4 font-bold" onclick="this.parentElement.style.display='none'">×</button>
+        </div>
+    }
+
+    <form asp-action="CreateEvent" method="post" enctype="multipart/form-data" class="space-y-4">
+        @Html.AntiForgeryToken()
+
+        <!-- Title -->
+        <div>
+            <label class="block text-gray-700 font-medium">Title</label>
+            <input asp-for="Title" class="w-full border rounded p-2 mt-1" />
+            <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Description -->
+        <div>
+            <label class="block text-gray-700 font-medium">Description</label>
+            <textarea asp-for="Description" class="w-full border rounded p-2 mt-1" rows="4"></textarea>
+            <span asp-validation-for="Description" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Event Date -->
+        <div>
+            <label class="block text-gray-700 font-medium">Event Date & Time</label>
+            <input asp-for="EventDate" type="datetime-local" step="60" class="w-full border rounded p-2 mt-1" />
+            <span asp-validation-for="EventDate" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Ticket Price -->
+        <div>
+            <label class="block text-gray-700 font-medium">Base Ticket Price</label>
+            <input asp-for="TicketPrice" type="number" min="0" step="0.01" class="w-full border rounded p-2 mt-1" />
+            <span asp-validation-for="TicketPrice" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Total Seats -->
+        <div>
+            <label class="block text-gray-700 font-medium">Total Seats</label>
+            <input asp-for="TotalSeats" type="number" min="0" class="w-full border rounded p-2 mt-1" />
+            <span asp-validation-for="TotalSeats" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Category -->
+        <div>
+            <label class="block text-gray-700 font-medium">Category</label>
+            <select asp-for="CategoryId" asp-items="Model.Categories" class="w-full border rounded p-2 mt-1">
+                <option value="">-- Select Category --</option>
+            </select>
+            <span asp-validation-for="CategoryId" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Venue -->
+        <div>
+            <label class="block text-gray-700 font-medium">Venue</label>
+            <select asp-for="VenueId" asp-items="Model.Venues" class="w-full border rounded p-2 mt-1">
+                <option value="">-- Select Venue --</option>
+            </select>
+            <span asp-validation-for="VenueId" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Event Image -->
+        <div>
+            <label class="block text-gray-700 font-medium">Event Image</label>
+            <input asp-for="ImageFile" type="file" class="w-full mt-1" />
+            <span asp-validation-for="ImageFile" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Form Buttons -->
+        <div class="flex justify-end mt-6">
+            <a asp-action="Dashboard" asp-controller="Organizer" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100 mr-2">Cancel</a>
+            <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Create Event</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

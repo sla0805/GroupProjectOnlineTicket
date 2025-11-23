@@ -1,0 +1,153 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+/* =================================
+   AUTH PAGE STYLING (LOGIN/REGISTER)
+   ================================= */
+
+/* 1. Background */
+body {
+    /* 1. Sets up the full viewport height */
+    min-height: 100vh;
+    /* 2. Enables Flexbox for centering */
+    display: flex;
+    /* 3. Centers horizontally */
+    justify-content: center;
+    /* 4. Centers vertically */
+    align-items: center;
+    /* Optional: Sets a background and padding for breathing room */
+    background: linear-gradient(135deg, #f0f2f5, #e6e9f0);
+    padding: 2rem 0;
+    /* Ensure the body doesn't cause horizontal overflow */
+    overflow-x: hidden;
+}
+
+/* 2. The "Floating Card" Container */
+.auth-container {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 450px; /* Limits the size of the floating card */
+    padding: 2.5rem 3rem;
+    margin: auto; /* Uses margin auto as a fallback/additional centering mechanism */
+    border: 1px solid #dfe3e8;
+}
+
+    .auth-container h2 {
+        text-align: center;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-container p {
+        text-align: center;
+        color: #718096;
+        margin-bottom: 2rem;
+    }
+
+/* 3. The "Floating Label" Wrapper */
+/* This is the standard Bootstrap 5 .form-floating structure */
+.form-floating {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+    .form-floating .form-control {
+        height: 60px; /* Taller input for a modern feel */
+        padding: 1rem 1rem 0;
+        border: 1px solid #cbd5e0;
+        border-radius: 8px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .form-floating label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        padding: 1.25rem 1rem; /* Aligns with input text */
+        pointer-events: none;
+        border: 1px solid transparent;
+        transform-origin: 0 0;
+        transition: opacity 0.1s ease-in-out, transform 0.2s ease-in-out;
+        color: #718096;
+    }
+
+    /* The "Floating" magic */
+    .form-floating .form-control:focus + label,
+    .form-floating .form-control:not(:placeholder-shown) + label {
+        transform: scale(0.85) translateY(-0.75rem) translateX(0.15rem);
+        color: #4299e1; /* Highlight color when active */
+        opacity: 1;
+    }
+
+    .form-floating .form-control:focus {
+        border-color: #4299e1;
+        box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+        outline: none;
+    }
+
+/* 4. Button and Links */
+.btn-auth {
+    width: 100%;
+    padding: 0.85rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    background-color: #2b6cb0; /* Primary color */
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+    .btn-auth:hover {
+        background-color: #2c5282; /* Darker shade on hover */
+    }
+
+.auth-link {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+    .auth-link p {
+        margin: 0;
+        color: #4a5568;
+    }
+
+    .auth-link a {
+        color: #2b6cb0;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+
+/* 5. Validation Text */
+.text-danger {
+    font-size: 0.875rem;
+}

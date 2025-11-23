@@ -1,0 +1,65 @@
+﻿@model OnlineTicket.Models.Event
+@{
+    ViewData["Title"] = "Edit Ticket Types";
+}
+
+<div class="max-w-5xl mx-auto p-6">
+    <h1 class="text-2xl font-bold mb-6 text-indigo-600">Ticket Types for "@Model.Title"</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="bg-green-100 text-green-800 p-3 rounded mb-4 flex justify-between items-center">
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" class="ml-4 font-bold" onclick="this.parentElement.style.display='none'">×</button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="bg-red-100 text-red-800 p-3 rounded mb-4 flex justify-between items-center">
+            <span>@TempData["ErrorMessage"]</span>
+            <button type="button" class="ml-4 font-bold" onclick="this.parentElement.style.display='none'">×</button>
+        </div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @foreach (var tt in Model.TicketTypes)
+        {
+            <div class="bg-white p-4 rounded shadow flex flex-col justify-between">
+                <div>
+                    <h2 class="font-semibold text-lg">@tt.Name</h2>
+                    <p class="text-gray-600 mt-1">Price: @tt.Price.ToString("C")</p>
+                    <p class="text-gray-600 mt-1">Total Seats: @tt.TotalSeats</p>
+                    <p class="text-gray-600 mt-1">Sold: @(tt.Tickets?.Count ?? 0)</p>
+                </div>
+
+                <div class="flex justify-between mt-4">
+                    <!-- Edit Form -->
+                    <form asp-action="UpdateTicketType" method="post" class="space-y-2">
+                        <input type="hidden" name="ticketTypeId" value="@tt.TicketTypeId" />
+                        <div>
+                            <input name="name" value="@tt.Name" class="border px-2 py-1 w-full rounded" />
+                        </div>
+                        <div>
+                            <input name="price" type="number" step="0.01" value="@tt.Price" class="border px-2 py-1 w-full rounded" />
+                        </div>
+                        <div>
+                            <input name="totalSeats" type="number" value="@tt.TotalSeats" min="0" class="border px-2 py-1 w-full rounded" />
+                        </div>
+                        <button type="submit" class="mt-2 px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 w-full">Update</button>
+                    </form>
+
+                    <!-- Delete Form -->
+                    <form asp-action="DeleteTicketType" method="post" onsubmit="return confirm('Are you sure you want to delete this ticket type?');">
+                        <input type="hidden" name="ticketTypeId" value="@tt.TicketTypeId" />
+                        <button type="submit" class="mt-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 w-full">Delete</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="mt-6">
+        <a asp-action="AddTicketTypes" asp-route-eventId="@Model.EventId" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Add New Ticket Type</a>
+        <a asp-action="Events" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">Event Lists</a>
+    </div>
+</div>

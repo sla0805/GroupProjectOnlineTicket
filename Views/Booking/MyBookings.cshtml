@@ -1,0 +1,49 @@
+﻿@model IEnumerable<OnlineTicket.Models.Booking>
+
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<div class="container py-5">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            You have not booked any tickets yet. <a asp-controller="Event" asp-action="Index">Browse events</a>.
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var booking in Model)
+            {
+                <div class="col-lg-6 col-md-12">
+                    <div class="card shadow-sm border-0 rounded-3">
+                        <div class="card-body">
+
+                            <h5 class="card-title">@booking.Event.Title (@booking.Event.EventDate.ToString("MMM dd, yyyy"))</h5>
+                            <p class="mb-1"><strong>Booking Date:</strong> @booking.CreatedAt.ToString("MMM dd, yyyy")</p>
+                            <p class="mb-1"><strong>Tickets:</strong> @booking.Tickets.Count</p>
+                            <p class="mb-1"><strong>Total Amount:</strong> @booking.TotalAmount.ToString("C")</p>
+                            <p class="mb-1"><strong>Status:</strong> @booking.PaymentStatus</p>
+
+                            <div class="mt-3">
+                                <h6>QR Codes:</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    @foreach (var ticket in booking.Tickets)
+                                    {
+                                        <div class="qr-code">
+                                            <img src="data:image/png;base64,@ticket.QRCode" alt="QR Code for ticket @ticket.TicketId" class="img-fluid border p-1 rounded" style="width:100px;height:100px;" />
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,40 @@
+﻿/* --- CUSTOM DESIGN ENHANCEMENTS for User Role Management Page --- */
+
+/* 1. Base Card Styling */
+.card {
+    /* Smooth transitions for hover effects on transform, shadow, and border */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, border-color 0.3s ease-in-out;
+    border-radius: 12px; /* Rounded corners for a modern look */
+    border-width: 2px !important; /* Emphasize the color border (border-info, border-danger, etc.) */
+    overflow: hidden;
+}
+
+    /* 2. Card Hover Effect */
+    /* This lifts the card and applies a large shadow (similar to Bootstrap's shadow-lg) */
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.15) !important;
+    }
+
+/* 3. Badge Styling */
+/* Makes the role badges (ADMINISTRATOR, ORGANIZER, CUSTOMER) stand out */
+.badge {
+    font-weight: 700;
+    letter-spacing: 0.5px; /* Slight letter spacing */
+    padding: 0.5em 0.8em; /* Slightly larger padding */
+    border-radius: 50rem; /* Pill shape */
+}
+
+/* 4. Customizing the Demote Button Hover State */
+/* The Razor code uses .btn-outline-warning, which is targeted here for a cleaner hover effect */
+.btn-outline-warning {
+    /* Ensures the warning outline text remains yellow */
+    color: #ffc107;
+    border-color: #ffc107;
+}
+
+    .btn-outline-warning:hover {
+        /* Reverses colors on hover for a solid fill */
+        background-color: #ffc107;
+        color: #212529 !important; /* Black text on yellow background */
+    }

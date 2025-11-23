@@ -1,0 +1,135 @@
+﻿@model List<OnlineTicket.Models.UserViewModel>
+@{
+    ViewData["Title"] = "User Role Management";
+    <link rel="stylesheet" href="~/css/user.css" asp-append-version="true" />
+
+}
+
+<div class="container py-4">
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="display-5 fw-bold text-primary pb-3 border-bottom">User Role Management 👥</h2>
+            <p class="text-muted">Manage roles for all users registered on the StarEvents platform.</p>
+        </div>
+    </div>
+
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow" role="alert">
+            <i class="fa-solid fa-check-circle me-2"></i> @TempData["Message"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow" role="alert">
+            <i class="fa-solid fa-xmark-circle me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+
+        @foreach (var user in Model.OrderBy(u => u.Email))
+        {
+            var currentRole = user.IsAdmin ? "Admin" : (user.IsOrganizer ? "Organizer" : "Customer");
+            var cardColor = user.IsAdmin ? "border-danger" : (user.IsOrganizer ? "border-warning" : "border-info");
+
+            <div class="col">
+                <div class="card h-100 shadow-sm @cardColor @(user.IsAdmin ? "bg-light" : "")">
+                    <div class="card-body d-flex flex-column">
+
+                        <h5 class="card-title mb-1">
+                            @if (user.IsAdmin)
+                            {
+                                <i class="fa-solid fa-user-shield me-2 text-danger"></i>
+                            }
+                            else if (user.IsOrganizer)
+                            {
+                                <i class="fa-solid fa-user-gear me-2 text-warning"></i>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-user me-2 text-info"></i>
+                            }
+                            @user.Email
+                        </h5>
+
+                        <div class="mb-3">
+                            @if (user.IsAdmin)
+                            {
+                                <span class="badge bg-danger fs-6">ADMINISTRATOR</span>
+                            }
+                            else if (user.IsOrganizer)
+                            {
+                                <span class="badge bg-warning text-dark fs-6">EVENT ORGANIZER</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info fs-6">CUSTOMER</span>
+                            }
+                        </div>
+
+                        <p class="text-muted small mb-3 flex-grow-1">
+                            @if (user.IsAdmin)
+                            {
+                                <span>Has full control over the platform and system configuration.</span>
+                            }
+                            else if (user.IsOrganizer)
+                            {
+                                <span>Can create, manage, and sell tickets for events.</span>
+                            }
+                            else
+                            {
+                                <span>Standard user, can browse and purchase tickets.</span>
+                            }
+                        </p>
+
+                        <div class="mt-auto pt-2 border-top">
+                            @if (user.IsCustomer)
+                            {
+                                <form asp-action="PromoteToOrganizer" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@user.Id" />
+                                    <button type="submit" class="btn btn-sm btn-primary w-100"
+                                            onclick="return confirm('Promote @user.Email to Event Organizer role?');">
+                                        <i class="fa-solid fa-arrow-up me-1"></i> Promote to Organizer
+                                    </button>
+                                </form>
+                            }
+                            else if (user.IsOrganizer)
+                            {
+                                <form asp-action="DemoteToCustomer" method="post" style="display:inline;">
+                                    <input type="hidden" name="id" value="@user.Id" />
+                                    {{-- DEMOTE BUTTON: Changed to btn-outline-warning --}}
+                                    <button type="submit" class="btn btn-sm btn-outline-warning w-100"
+                                            onclick="return confirm('Demote @user.Email back to Customer role?');">
+                                        <i class="fa-solid fa-arrow-down me-1"></i> Demote to Customer
+                                    </button>
+                                </form>
+                            }
+                            else if (user.IsAdmin)
+                            {
+                                <button class="btn btn-sm btn-danger w-100 disabled">
+                                    <i class="fa-solid fa-lock me-1"></i> Cannot Modify Admin
+                                </button>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="mt-5 text-center">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <a asp-controller="Admin" asp-action="Index" class="btn btn-lg btn-secondary w-100">
+                    <i class="fa-solid fa-arrow-left me-2"></i> Back to Admin Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,97 @@
+﻿/* customer-dashboard.css */
+
+/* COLOR PALETTE */
+:root {
+    --primary-color: #0077B6; /* Deep Blue */
+    --dark-color: #03045E; /* Deep Navy */
+    --light-color: #FFFFFF; /* White */
+    --accent-light: #D6F3F4; /* Pale Cyan */
+    --secondary-text: #778899; /* Soft Slate Gray */
+    --image-blue-vibrant: #6F60F7; /* Vibrant Purple/Blue */
+    --success-color: #48C9B0; /* Mint/Teal Green */
+}
+
+/* Page container and header styles */
+.profile-header {
+    color: var(--dark-color);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.profile-subtitle {
+    color: var(--secondary-text);
+    margin-bottom: 2rem;
+}
+
+.info-card, .overview-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    background-color: var(--light-color);
+    padding: 2rem;
+    height: 100%;
+}
+
+.info-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px 30px;
+    margin-top: 1.5rem;
+}
+
+.info-item {
+    margin-bottom: 1.5rem;
+}
+
+.info-label {
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: var(--dark-color);
+    font-weight: 500;
+    display: block;
+}
+
+.section-heading {
+    color: var(--dark-color);
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.btn-action-primary {
+    background-color: var(--image-blue-vibrant);
+    border-color: var(--image-blue-vibrant);
+    color: var(--light-color);
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 10px 15px;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.3s ease;
+}
+
+    .btn-action-primary:hover {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+.btn-action-secondary {
+    background-color: var(--light-color);
+    border: 1px solid var(--secondary-text);
+    color: var(--secondary-text);
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 10px 15px;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.3s ease;
+}
+
+    .btn-action-secondary:hover {
+        background-color: var(--accent-light);
+        color: var(--dark-color);
+    }

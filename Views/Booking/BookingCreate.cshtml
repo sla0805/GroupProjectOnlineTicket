@@ -1,0 +1,69 @@
+﻿@model OnlineTicket.Models.BookingCreateVM
+
+@{
+    ViewData["Title"] = "Book Tickets";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-primary text-white text-center py-3 rounded-top-3">
+                    <h2 class="h4 mb-0">@ViewData["Title"] - @Model.Title</h2>
+                </div>
+                <div class="card-body p-4 p-md-5">
+
+                    <form asp-action="Create" method="post" novalidate>
+                        <input type="hidden" asp-for="EventId" />
+
+                        <div class="mb-3">
+                            <label asp-for="TicketTypeId" class="form-label fw-bold">Ticket Type</label>
+                            <select asp-for="TicketTypeId" class="form-select">
+                                <option value="">-- Select Ticket Type --</option>
+                                @foreach (var t in Model.TicketTypes)
+                                {
+                                    <option value="@t.TicketTypeId">@t.Name - @t.Price.ToString("C")</option>
+                                }
+                            </select>
+                            <span asp-validation-for="TicketTypeId" class="text-danger small mt-1"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Quantity" class="form-label fw-bold">Quantity</label>
+                            <input asp-for="Quantity" type="number" class="form-control" min="1" max="10" />
+                            <span asp-validation-for="Quantity" class="text-danger small mt-1"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Customer Name</label>
+                            <input type="text" class="form-control" value="@Model.CustomerFullName" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Phone Number</label>
+                            <input type="text" class="form-control" value="@Model.CustomerPhone" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Total Amount</label>
+                            <input type="text" class="form-control" value="@Model.TicketPrice * Model.Quantity:C" readonly />
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary fw-bold">
+                                <i class="bi bi-ticket-perforated-fill me-2"></i> Book Now
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
