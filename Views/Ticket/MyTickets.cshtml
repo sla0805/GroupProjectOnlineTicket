@@ -1,28 +1,39 @@
 ﻿@model List<OnlineTicket.Models.Ticket>
-@{
-    ViewBag.Title = "My Tickets";
-}
 
-<h2>My Tickets</h2>
+<div class="container mx-auto py-10 px-4">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6">My Tickets</h2>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Event</th>
-            <th>Ticket Type</th>
-            <th>QR Code</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var ticket in Model)
-        {
-            <tr>
-                <td>@ticket.Event.Title</td>
-                <td>@ticket.TicketType.Name</td>
-                <td>
-                    <img src="@ticket.QrBase64" alt="QR Code" width="150" height="150" />
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <a asp-action="DownloadTicketsPdf" asp-route-bookingId="@Model.FirstOrDefault()?.BookingId"
+       class="bg-blue-600 text-white px-4 py-2 rounded-lg mb-4 inline-block hover:bg-blue-700">
+        Download PDF
+    </a>
+  
+    @if (Model.Any())
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var ticket in Model)
+            {
+                <div class="bg-white shadow rounded-xl p-5 flex flex-col items-center text-center">
+                    <h3 class="text-lg font-bold text-blue-600 mb-2">@ticket.Event?.Title </h3>
+                    <p class="text-gray-500 mb-1">Ticket Type: <span class="font-semibold">@ticket.TicketType?.Name </span></p>
+                    <p class="text-gray-500 mb-1">Event Date: <span class="font-medium">@ticket.Event?.EventDate.ToString("MMM dd, yyyy @ hh:mm tt")</span></p>
+                    <p class="text-gray-500 mb-3">Venue: <span class="font-medium">@ticket.Event?.Venue?.Name </span></p>
+                    <img src="@ticket.QrBase64" alt="QR Code" class="w-36 h-36 mb-3 object-contain" />
+                    <p class="text-gray-500 text-sm">Ticket ID: <span class="font-medium">@ticket.TicketId</span></p>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-20">
+            <p class="text-gray-500 text-lg">No tickets available.</p>
+        </div>
+    }
+    <div class="mt-8 text-center">
+        <a asp-action="MyBookings" asp-controller="Booking"
+           class="inline-flex items-center px-6 py-3 bg-gray-700 rounded-lg shadow hover:bg-gray-800 hover:scale-105 transition transform text-white font-semibold">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Back to My Booking List
+        </a>
+    </div>
+</div>

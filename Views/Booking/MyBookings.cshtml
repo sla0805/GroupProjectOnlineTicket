@@ -3,110 +3,102 @@
     ViewBag.Title = "My Bookings";
 }
 
-<link rel="stylesheet" href="~/css/customer-dashboard.css" />
-
-<div class="container py-5">
+<div class="container mx-auto py-10 px-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold text-dark mb-1">My Bookings</h2>
-            <p class="text-muted mb-0">Manage your past and upcoming event reservations.</p>
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+        <div class="mb-4 md:mb-0">
+            <h2 class="text-2xl font-bold text-gray-800 mb-1">My Bookings</h2>
+            <p class="text-gray-500">Manage your past and upcoming event reservations.</p>
         </div>
-        <a asp-controller="Customer" asp-action="Dashboard" class="btn btn-outline-secondary btn-sm rounded-pill">
-            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
+        <a asp-controller="Customer" asp-action="Dashboard"
+           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-full text-gray-700 text-sm font-medium hover:bg-gray-100 transition">
+            <i class="bi bi-arrow-left mr-1"></i> Back to Dashboard
         </a>
     </div>
 
     <!-- Bookings Table -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm border-0 rounded-4 p-3">
-                <div class="card-body p-0">
-                    @if (Model.Any())
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th class="ps-4">Event</th>
-                                        <th class="text-center">Quantity</th>
-                                        <th>Total</th>
-                                        <th>Status</th>
-                                        <th class="text-end pe-4">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var b in Model)
+    <div class="overflow-x-auto">
+        @if (Model.Any())
+        {
+            <div class="bg-white shadow rounded-xl overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach (var b in Model)
+                        {
+                            <tr>
+                                <td class="px-6 py-4 font-semibold text-blue-600">@b.Event.Title</td>
+                                <td class="px-6 py-4 text-center">
+                                    <span class="px-2 py-1 bg-gray-100 text-gray-800 text-sm rounded-full border">@b.Quantity</span>
+                                </td>
+                                <td class="px-6 py-4 font-bold text-gray-800">@b.TotalAmount.ToString("C")</td>
+                                <td class="px-6 py-4">
+                                    @switch (b.BookingStatus)
                                     {
-                                        <tr>
-                                            <td class="ps-4 fw-bold text-primary">@b.Event.Title</td>
-                                            <td class="text-center">
-                                                <span class="badge bg-light text-dark border">@b.Quantity</span>
-                                            </td>
-                                            <td class="fw-bold text-dark">@b.TotalAmount.ToString("C")</td>
-                                            <td>
-                                                @switch (b.BookingStatus)
-                                                {
-                                                    case "Pending":
-                                                        <span class="badge bg-warning text-dark status-badge">Pending</span>
-                                                        break;
-                                                    case "Paid":
-                                                    case "Confirmed":
-                                                        <span class="badge bg-success status-badge">Confirmed</span>
-                                                        break;
-                                                    default:
-                                                        <span class="badge bg-secondary status-badge">@b.BookingStatus</span>
-                                                        break;
-                                                }
-                                            </td>
-                                            <td class="text-end pe-4">
-                                                <div class="d-flex justify-content-end align-items-center gap-2">
-                                                    @if (b.BookingStatus == "Pending")
-                                                    {
-                                                        <a asp-controller="Payment" asp-action="Create" asp-route-bookingId="@b.BookingId"
-                                                           class="btn btn-success btn-sm rounded-pill px-3 shadow-sm">
-                                                            <i class="bi bi-credit-card me-1"></i> Pay Now
-                                                        </a>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span class="text-success small fw-bold me-2">
-                                                            <i class="bi bi-check-circle-fill"></i> Paid
-                                                        </span>
-                                                    }
-
-                                                    <a asp-controller="Ticket" asp-action="MyTickets" asp-route-bookingId="@b.BookingId"
-                                                       class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                                                        <i class="bi bi-ticket-perforated me-1"></i> View Tickets
-                                                    </a>
-                                                    <a asp-action="Details" asp-route-id="@b.BookingId" class="btn btn-info btn-sm">
-                                                        View
-                                                    </a>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        case "Pending":
+                                            <span class="px-2 py-1 bg-yellow-200 text-yellow-800 text-sm rounded-full">Pending</span>
+                                            break;
+                                        case "Paid":
+                                        case "Confirmed":
+                                            <span class="px-2 py-1 bg-green-200 text-green-800 text-sm rounded-full">Confirmed</span>
+                                            break;
+                                        default:
+                                            <span class="px-2 py-1 bg-gray-200 text-gray-800 text-sm rounded-full">@b.BookingStatus</span>
+                                            break;
                                     }
-                                </tbody>
-                            </table>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="text-center py-5">
-                            <div class="mb-3 text-muted opacity-50">
-                                <i class="bi bi-ticket-detailed fs-1"></i>
-                            </div>
-                            <h5 class="text-muted">No bookings found</h5>
-                            <a asp-controller="Event" asp-action="Index" class="btn btn-primary mt-2 rounded-pill px-4">
-                                Browse Events
-                            </a>
-                        </div>
-                    }
-                </div>
+                                </td>
+                                <td class="px-6 py-4 text-right space-x-2">
+                                    @if (b.BookingStatus == "Pending")
+                                    {
+                                        <a asp-controller="Payment" asp-action="Create" asp-route-bookingId="@b.BookingId"
+                                           class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-sm font-semibold rounded-full hover:bg-green-700 transition">
+                                            <i class="bi bi-credit-card mr-1"></i> Pay Now
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-green-600 text-sm font-bold inline-flex items-center">
+                                            <i class="bi bi-check-circle-fill mr-1"></i> Paid
+                                        </span>
+                                    }
+
+                                    <a asp-controller="Ticket" asp-action="MyTickets" asp-route-bookingId="@b.BookingId"
+                                       class="inline-flex items-center px-3 py-1.5 border border-blue-600 text-blue-600 text-sm font-semibold rounded-full hover:bg-blue-50 transition">
+                                        <i class="bi bi-ticket-perforated mr-1"></i> View Tickets
+                                    </a>
+
+                                    <a asp-action="Details" asp-route-id="@b.BookingId"
+                                       class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-sm font-semibold rounded-full hover:bg-blue-600 transition">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="text-center py-20">
+                <div class="mb-4 text-gray-400 opacity-50 text-6xl">
+                    <i class="bi bi-ticket-detailed"></i>
+                </div>
+                <h5 class="text-gray-500 text-lg font-medium mb-3">No bookings found</h5>
+                <a asp-controller="Event" asp-action="Index"
+                   class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 transition">
+                    Browse Events
+                </a>
+            </div>
+        }
     </div>
 </div>
-
-

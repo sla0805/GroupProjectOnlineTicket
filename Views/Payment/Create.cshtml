@@ -1,7 +1,6 @@
 ﻿@model OnlineTicket.Models.PaymentVM
 @{
     ViewData["Title"] = "Secure Checkout (Step 2)";
-    // These variables are correctly read from the ViewBag populated in the Controller
     var eventTitle = ViewBag.EventTitle;
     var eventImage = ViewBag.EventImage;
     var venueName = ViewBag.VenueName;
@@ -9,115 +8,116 @@
     var eventId = ViewBag.EventId;
 }
 
-<link rel="stylesheet" href="~/css/booking.css" />
+<!-- Tailwind CDN (remove in production if precompiled) -->
+<script src="https://cdn.tailwindcss.com"></script>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-xl-10">
+<div class="max-w-5xl mx-auto px-4 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Event Summary Sidebar -->
+        <div class="lg:col-span-5 relative rounded-2xl overflow-hidden shadow-lg h-full">
+            <img src="@(eventImage ?? "https://via.placeholder.com/600x400?text=Event+Image")" alt="@eventTitle"
+                 class="w-full h-full object-cover">
 
-            <div class="card single-page-checkout-card shadow-lg border-0 overflow-hidden">
-                <div class="row g-0">
-
-                    <div class="col-lg-5 event-sidebar-wrapper">
-                        <div class="event-image-container h-100">
-                            <img src="@(eventImage ?? "https://via.placeholder.com/600x400?text=Event+Image")"
-                                 class="event-img-cover"
-                                 alt="@eventTitle" />
-
-                            <div class="event-overlay">
-                                <span class="badge bg-white text-primary mb-2 shadow-sm">Your Order Summary</span>
-                                <h3 class="fw-bold mb-1">@eventTitle</h3>
-
-                                <div class="d-flex align-items-center mt-2 text-white-50 small">
-                                    <i class="bi bi-geo-alt me-1"></i> @(venueName)
-                                </div>
-                                <div class="d-flex align-items-center mt-1 text-white-50 small">
-                                    <i class="bi bi-calendar3 me-1"></i> @(eventDate.ToString("MMM dd, yyyy @ hh:mm tt"))
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-7 p-4 p-md-5">
-
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h4 class="fw-bold text-dark mb-0">Secure Payment Details</h4>
-                            <div class="text-muted small">Step 2 of 2</div>
-                        </div>
-
-                        <form asp-action="Create" method="post">
-                            <input type="hidden" asp-for="BookingId" />
-                            <input type="hidden" asp-for="Amount" />
-
-                            <div class="payment-header">
-                                <small class="text-white-50 text-uppercase fw-bold">Total Amount</small>
-                                <div class="amount-display">@Model.Amount.ToString("C")</div>
-                                <div class="badge bg-white text-primary rounded-pill px-3">
-                                    Booking ID: #@Model.BookingId
-                                </div>
-                            </div>
-
-                            <div class="card-body p-0 pt-4">
-                                <label class="form-label text-muted small fw-bold mb-3">Select Payment Method</label>
-                                <div class="payment-methods-grid">
-                                    <input type="radio" class="btn-check" asp-for="PaymentMethod" id="pm_visa" value="Visa" checked>
-                                    <label class="payment-method-tile" for="pm_visa">
-                                        <i class="bi bi-credit-card-2-front method-icon"></i>
-                                        <span class="method-name">Visa</span>
-                                    </label>
-
-                                    <input type="radio" class="btn-check" asp-for="PaymentMethod" id="pm_master" value="MasterCard">
-                                    <label class="payment-method-tile" for="pm_master">
-                                        <i class="bi bi-credit-card method-icon"></i>
-                                        <span class="method-name">MasterCard</span>
-                                    </label>
-                                </div>
-                                <span asp-validation-for="PaymentMethod" class="text-danger small d-block mb-4"></span>
-
-                                <hr class="my-4 text-muted opacity-25">
-
-                                <h6 class="fw-bold mb-3">Card Details</h6>
-
-                                <div class="form-floating mb-3">
-                                    <input asp-for="CardNumber" class="form-control" placeholder="0000 0000 0000 0000" id="cardInput" maxlength="19" required />
-                                    <label for="cardInput"><i class="bi bi-credit-card-fill me-2"></i>Card Number</label>
-                                    <span asp-validation-for="CardNumber" class="text-danger small"></span>
-                                </div>
-
-                                <div class="row g-3 mb-4">
-                                    <div class="col-6">
-                                        <div class="form-floating">
-                                            <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YY" id="expiryInput" maxlength="5" required />
-                                            <label for="expiryInput">Expiry (MM/YY)</label>
-                                        </div>
-                                        <span asp-validation-for="ExpiryDate" class="text-danger small"></span>
-                                    </div>
-                                    <div class="col-6">
-                                        <div class="form-floating">
-                                            <input asp-for="CVV" type="password" class="form-control" placeholder="123" id="cvvInput" maxlength="4" required />
-                                            <label for="cvvInput"><i class="bi bi-lock-fill me-1"></i> CVV</label>
-                                        </div>
-                                        <span asp-validation-for="CVV" class="text-danger small"></span>
-                                    </div>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center pt-4 mt-3">
-                                    <a asp-controller="Booking"
-                                       asp-action="Create"
-                                       asp-route-eventId="@eventId"
-                                       class="btn btn-light rounded-pill px-4 fw-bold">
-                                        Go Back
-                                    </a>
-                                    <button type="submit" class="btn btn-pay btn-lg ">
-                                        Pay @Model.Amount.ToString("C")
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-
-                    </div>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent p-6 flex flex-col justify-end text-white">
+                <h3 class="text-2xl font-bold mb-1">@eventTitle</h3>
+                <div class="flex items-center gap-2 text-sm text-white/80">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-10H9v4h2V8zm0 6H9v2h2v-2z" clip-rule="evenodd" />
+                    </svg>
+                    @venueName
+                </div>
+                <div class="flex items-center gap-2 text-sm text-white/80 mt-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6 2a1 1 0 00-1 1v1H3a2 2 0 00-2 2v10a1 1 0 001 1h14a1 1 0 001-1V6a2 2 0 00-2-2h-2V3a1 1 0 00-1-1H6z" />
+                    </svg>
+                    @eventDate.ToString("MMM dd, yyyy @ hh:mm tt")
                 </div>
             </div>
         </div>
+
+        <!-- Payment Form -->
+        <div class="lg:col-span-7 bg-white rounded-2xl shadow-lg p-6 lg:p-10">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800">Secure Payment Details</h2>
+                <span class="text-sm text-slate-500">Step 2 of 2</span>
+            </div>
+
+            <form asp-action="Create" method="post" class="space-y-6">
+                <input type="hidden" asp-for="BookingId" />
+                <input type="hidden" asp-for="Amount" />
+
+                <!-- Amount summary -->
+                <div class="bg-blue-50 p-4 rounded-xl text-center">
+                    <span class="block text-xs font-semibold text-blue-500 uppercase">Total Amount</span>
+                    <div class="text-2xl font-bold text-slate-800 my-1">@Model.Amount.ToString("C")</div>
+                    <span class="inline-block bg-white text-blue-600 px-3 py-1 rounded-full text-xs shadow">Booking ID: #@Model.BookingId</span>
+                </div>
+
+                <!-- Payment Method -->
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-2">Select Payment Method</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <input type="radio" asp-for="PaymentMethod" id="pm_visa" value="Visa" class="hidden peer" checked>
+                            <label for="pm_visa" class="flex items-center justify-center gap-2 p-4 border rounded-xl cursor-pointer peer-checked:border-blue-500 peer-checked:bg-blue-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5h16v10H2z" /></svg>
+                                Visa
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" asp-for="PaymentMethod" id="pm_master" value="MasterCard" class="hidden peer">
+                            <label for="pm_master" class="flex items-center justify-center gap-2 p-4 border rounded-xl cursor-pointer peer-checked:border-blue-500 peer-checked:bg-blue-50">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5h16v10H2z" /></svg>
+                                MasterCard
+                            </label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="PaymentMethod" class="text-sm text-red-600 mt-1 block"></span>
+                </div>
+
+                <hr class="border-t border-slate-200 my-4">
+
+                <!-- Card Details -->
+                <div class="space-y-4">
+                    <div>
+                        <label asp-for="CardNumber" class="block text-sm font-semibold text-slate-600 mb-1">Card Number</label>
+                        <input asp-for="CardNumber" maxlength="19" placeholder="0000 0000 0000 0000" required
+                               class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:outline-none" />
+                        <span asp-validation-for="CardNumber" class="text-sm text-red-600 mt-1 block"></span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label asp-for="ExpiryDate" class="block text-sm font-semibold text-slate-600 mb-1">Expiry (MM/YY)</label>
+                            <input asp-for="ExpiryDate" maxlength="5" placeholder="MM/YY" required
+                                   class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:outline-none" />
+                            <span asp-validation-for="ExpiryDate" class="text-sm text-red-600 mt-1 block"></span>
+                        </div>
+                        <div>
+                            <label asp-for="CVV" class="block text-sm font-semibold text-slate-600 mb-1">CVV</label>
+                            <input asp-for="CVV" type="password" maxlength="4" placeholder="123" required
+                                   class="w-full border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-200 focus:outline-none" />
+                            <span asp-validation-for="CVV" class="text-sm text-red-600 mt-1 block"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex justify-between items-center mt-6">
+                    <a asp-controller="Booking" asp-action="Create" asp-route-eventId="@eventId"
+                       class="px-6 py-2 rounded-full border border-slate-300 hover:bg-slate-50 text-sm font-medium">
+                        Go Back
+                    </a>
+                    <button type="submit"
+                            class="px-6 py-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm">
+                        Pay @Model.Amount.ToString("C")
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

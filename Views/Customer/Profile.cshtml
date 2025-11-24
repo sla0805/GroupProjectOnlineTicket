@@ -2,95 +2,119 @@
 
 @{
     ViewData["Title"] = "My Profile";
-
 }
+
 <link rel="stylesheet" href="~/css/customerprofile.css" asp-append-version="true" />
 
-<div class="container py-5">
-    <div class="row g-4">
+<div class="container mx-auto py-10 px-4">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- LEFT COLUMN: Profile Form -->
-        <div class="col-lg-7">
-            <div class="info-card">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="section-heading">@ViewData["Title"]</h4>
+        <!-- LEFT COLUMN -->
+        <div class="lg:col-span-7">
+            <div class="bg-white shadow-md rounded-xl p-6 border border-gray-100">
+
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-2xl font-semibold text-gray-700">@ViewData["Title"]</h4>
                 </div>
 
-                <hr class="mt-0" style="border-color: var(--accent-light);" />
+                <hr class="border-gray-200 mb-4" />
 
                 @if (TempData["ProfileSuccess"] != null)
                 {
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <strong>Success!</strong> @TempData["ProfileSuccess"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <div class="bg-green-100 text-green-700 px-4 py-3 rounded-md mb-4 flex justify-between items-center">
+                        <div>
+                            <strong>Success!</strong> @TempData["ProfileSuccess"]
+                        </div>
+                        <button type="button" class="text-lg font-bold text-green-700" data-bs-dismiss="alert">×</button>
                     </div>
                 }
 
                 <form asp-action="Profile" method="post" novalidate>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <label asp-for="FullName" class="form-label fw-bold"></label>
-                            <input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
-                            <span asp-validation-for="FullName" class="text-danger small mt-1"></span>
+                        <!-- FULL NAME -->
+                        <div>
+                            <label asp-for="FullName" class="block font-medium text-gray-700"></label>
+                            <input asp-for="FullName"
+                                   class="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Enter your full name" />
+                            <span asp-validation-for="FullName" class="text-red-500 text-sm"></span>
                         </div>
 
-                        <div class="col-md-6 mb-4">
-                            <label asp-for="Email" class="form-label fw-bold"></label>
-                            <input asp-for="Email" class="form-control bg-light" readonly />
-                            <small class="form-text text-muted">Email cannot be changed.</small>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-4">
-                            <label asp-for="PhoneNumber" class="form-label fw-bold"></label>
-                            <input asp-for="PhoneNumber" class="form-control" placeholder="e.g., (123) 456-7890" />
-                            <span asp-validation-for="PhoneNumber" class="text-danger small mt-1"></span>
+                        <!-- EMAIL -->
+                        <div>
+                            <label asp-for="Email" class="block font-medium text-gray-700"></label>
+                            <input asp-for="Email"
+                                   class="mt-1 w-full bg-gray-100 border border-gray-300 rounded-lg p-2"
+                                   readonly />
+                            <small class="text-gray-500 text-sm">Email cannot be changed.</small>
                         </div>
 
-                        <div class="col-md-6 mb-4">
-                            <label asp-for="CreatedAt" class="form-label fw-bold"></label>
-                            <input asp-for="CreatedAt" class="form-control bg-light" readonly />
-                            <small class="form-text text-muted">Your account creation date.</small>
+                        <!-- PHONE -->
+                        <div>
+                            <label asp-for="PhoneNumber" class="block font-medium text-gray-700"></label>
+                            <input asp-for="PhoneNumber"
+                                   class="mt-1 w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500"
+                                   placeholder="e.g., 09-1234-56789" />
+                            <span asp-validation-for="PhoneNumber" class="text-red-500 text-sm"></span>
                         </div>
+
+                        <!-- CREATED DATE -->
+                        <div>
+                            <label asp-for="CreatedAt" class="block font-medium text-gray-700"></label>
+                            <input asp-for="CreatedAt"
+                                   class="mt-1 w-full bg-gray-100 border border-gray-300 rounded-lg p-2"
+                                   readonly />
+                            <small class="text-gray-500 text-sm">Your account creation date.</small>
+                        </div>
+
                     </div>
 
                     <input type="hidden" asp-for="CustomerId" />
 
-                    <div class="d-grid mt-4">
-                        <button type="submit" class="btn btn-action-primary fw-bold">
-                            <i class="bi bi-save me-2"></i> Save Changes
+                    <div class="mt-6">
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">
+                            <i class="bi bi-save mr-2"></i> Save Changes
                         </button>
                     </div>
-
                 </form>
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: Quick Actions -->
-        <div class="col-lg-5">
-            <div class="overview-card">
+        <!-- RIGHT COLUMN -->
+        <div class="lg:col-span-5">
+            <div class="bg-white shadow-md rounded-xl p-6 border border-gray-100">
 
-                <h4 class="section-heading mb-3"><i class="fas fa-bolt me-1"></i> Quick Actions</h4>
-                <hr class="mt-0 mb-4" style="border-color: var(--accent-light);" />
-                <a class="btn btn-action-secondary w-100 mb-2" asp-controller="Customer" asp-action="Dashboard">
-                    <i class="fas fa-list me-1"></i> My Dashboard
+                <h4 class="text-xl font-semibold text-gray-700 mb-4">
+                    <i class="fas fa-bolt mr-1"></i> Quick Actions
+                </h4>
+
+                <hr class="border-gray-200 mb-4" />
+
+                <!-- Dashboard -->
+                <a class="w-full block bg-indigo-600 text-white text-center py-3 rounded-lg mb-3 hover:bg-indigo-700 transition"
+                   asp-controller="Customer" asp-action="Dashboard">
+                    <i class="fas fa-list mr-1"></i> My Dashboard
                 </a>
-                <!-- My Booking List -->
-                <a class="btn btn-action-secondary w-100 mb-2" asp-controller="Booking" asp-action="MyBookings">
-                    <i class="fas fa-list me-1"></i> My Booking List
+
+                <!-- My Bookings -->
+                <a class="w-full block bg-indigo-600 text-white text-center py-3 rounded-lg mb-3 hover:bg-indigo-700 transition"
+                   asp-controller="Booking" asp-action="MyBookings">
+                    <i class="fas fa-ticket-alt mr-1"></i> My Booking List
                 </a>
 
                 <!-- Browse Events -->
-                <a class="btn btn-action-secondary w-100 mb-2" asp-controller="Event" asp-action="Index">
-                    <i class="fas fa-calendar-check me-1"></i> Browse Events
+                <a class="w-full block bg-indigo-600 text-white text-center py-3 rounded-lg mb-3 hover:bg-indigo-700 transition"
+                   asp-controller="Event" asp-action="Index">
+                    <i class="fas fa-calendar-check mr-1"></i> Browse Events
                 </a>
 
-                <!-- Recent Events -->
-                <a class="btn btn-action-secondary w-100 mb-2" asp-controller="Event" asp-action="RecentEvents">
-                    <i class="fas fa-history me-1"></i> Recent Events
+                <a class="w-full block bg-indigo-600 text-white text-center py-3 rounded-lg hover:bg-indigo-700 transition"
+                   asp-controller="Account" asp-action="EditAccount">
+                    <i class="bi bi-person-circle"></i> Edit Your Account
                 </a>
+
+                
 
             </div>
         </div>

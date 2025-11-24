@@ -80,7 +80,7 @@ public class PaymentController : Controller
                 BookingId = booking.BookingId,
                 EventId = booking.EventId,
                 TicketTypeId = booking.Tickets.FirstOrDefault()?.TicketTypeId ?? 1,
-                QrBase64 = GenerateQrBase64($"Booking:{booking.BookingId}-Ticket:{i + 1}")
+                QrBase64 = QrHelper.GenerateQrBase64($"Booking:{booking.BookingId}-Ticket:{i + 1}")
             };
             _db.Tickets.Add(ticket);
         }
@@ -90,12 +90,5 @@ public class PaymentController : Controller
         return RedirectToAction("MyBookings", "Booking");
     }
 
-    private string GenerateQrBase64(string text)
-    {
-        using var qrGenerator = new QRCodeGenerator();
-        var qrData = qrGenerator.CreateQrCode(text, ECCLevel.Q);
-        using var qrCode = new PngByteQRCode(qrData);
-        var qrBytes = qrCode.GetGraphic(20);
-        return $"data:image/png;base64,{Convert.ToBase64String(qrBytes)}";
-    }
+   
 }
