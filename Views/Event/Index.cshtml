@@ -1,0 +1,145 @@
+﻿@model IEnumerable<OnlineTicket.Models.Event>
+@{
+    ViewData["Title"] = "Browse Events";
+    var page = ViewBag.Page as int? ?? 1;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var currentCategoryId = ViewBag.CategoryId?.ToString() ?? "";
+    var currentVenueId = ViewBag.VenueId?.ToString() ?? "";
+    var currentSearch = ViewBag.Search ?? "";
+    var currentDateString = ViewBag.DateString ?? "";
+}
+
+<link rel="stylesheet" href="~/css/event-home.css" />
+
+<div class="container py-5">
+    <div class="row align-items-end mb-4">
+        <div class="col-md-6 mb-3 mb-md-0">
+            <h1 class="fw-bolder text-primary mb-1">Discover Events</h1>
+            <p class="text-muted mb-0">Find your next experience by category, location, or date.</p>
+        </div>
+        <div class="col-md-6">
+            <form method="get" class="d-flex w-100">
+                <div class="input-group input-group-lg search-input-group shadow-sm">
+                    <span class="input-group-text border-0 bg-white"><i class="bi bi-search"></i></span>
+                    <input class="form-control form-control-lg border-0"
+                                        type="search" name="search" placeholder="Search event titles, venues..."
+                                        value="@currentSearch" />
+                    <button class="btn btn-primary rounded-end-3" type="submit">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <form method="get" class="row g-3 mb-5 align-items-end filter-form">
+        <div class="col-sm-6 col-md-3">
+            <label class="form-label small fw-bold text-muted">Category</label>
+            <select class="form-select form-select-sm" name="categoryId">
+                <option value="">All categories</option>
+                @foreach (var i in (IEnumerable<SelectListItem>)ViewBag.CategoryList)
+                {
+                    <option value="@i.Value" selected="@(i.Value == currentCategoryId)">@i.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <label class="form-label small fw-bold text-muted">Venue</label>
+            <select class="form-select form-select-sm" name="venueId">
+                <option value="">All venues</option>
+                @foreach (var i in (IEnumerable<SelectListItem>)ViewBag.VenueList)
+                {
+                    <option value="@i.Value" selected="@(i.Value == currentVenueId)">@i.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-sm-6 col-md-3">
+            <label class="form-label small fw-bold text-muted">Date</label>
+            <input type="date" class="form-control form-control-sm" name="date" value="@currentDateString" />
+        </div>
+
+        <div class="col-sm-6 col-md-3 d-flex gap-2">
+            <button class="btn btn-dark w-50 btn-sm" type="submit">Filter</button>
+            <a asp-controller="Event" asp-action="Index" class="btn btn-outline-secondary w-50 btn-sm">Clear</a>
+        </div>
+    </form>
+
+    @if (Model.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var evt in Model)
+            {
+                <div class="col">
+                    <div class="card event-card h-100 border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="event-image-wrapper">
+                            <img src="@(string.IsNullOrEmpty(evt.ImagePath) ? "https://via.placeholder.com/600x400?text=Event+Image" : evt.ImagePath)"
+                                                  class="card-img-top"
+                                                  alt="@evt.Title" />
+                        </div>
+                        <div class="card-body d-flex flex-column p-3">
+                            <h5 class="card-title mb-1 text-truncate fw-bold">@evt.Title</h5>
+                            <div class="d-flex justify-content-between align-items-baseline mb-2">
+                                <p class="mb-0 small text-muted">
+                                    <i class="bi bi-geo-alt-fill me-1"></i> @(evt.Venue?.Name )
+                                </p>
+                                <p class="mb-0 fw-bold text-success">@evt.TicketPrice.ToString("C")</p>
+                            </div>
+                            <p class="mb-3 small text-primary fw-semibold">
+                                <i class="bi bi-calendar-event me-1"></i> @evt.EventDate.ToString("MMM dd, yyyy @ HH:mm")
+                            </p>
+
+                            <div class="mt-auto pt-2">
+                                <a asp-controller="Booking"
+                                                     asp-action="Create"
+                                                     asp-route-eventId="@evt.EventId"
+                                                     class="btn btn-outline-primary btn-sm rounded-pill w-100">
+                                    View Details / Book
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center mt-5" role="alert">
+            <h4 class="alert-heading">No Events Found</h4>
+            <p>Try clearing your filters or adjusting your search terms.</p>
+            <a asp-controller="Event" asp-action="Index" class="btn btn-info mt-2">Clear Filters</a>
+        </div>
+    }
+
+
+    @if (totalPages > 1)
+    {
+        <nav class="mt-5" aria-label="Page navigation">
+            <ul class="pagination justify-content-center pagination-lg">
+                {{ /* Previous Button */ }}
+                <li class="page-item @(page <= 1 ? "disabled" : "")">
+                    <a class="page-link" href="?page=@(page-1)&categoryId=@currentCategoryId&venueId=@currentVenueId&date=@currentDateString&search=@currentSearch" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                {{ /* Page Numbers */ }}
+                @for (int p = 1; p <= totalPages; p++)
+                {
+                    <li class="page-item @(p == page ? "active" : "")">
+                        <a class="page-link" href="?page=@p&categoryId=@currentCategoryId&venueId=@currentVenueId&date=@currentDateString&search=@currentSearch">@p</a>
+                    </li>
+                }
+
+                {{ /* Next Button */ }}
+                <li class="page-item @(page >= totalPages ? "disabled" : "")">
+                    <a class="page-link" href="?page=@(page+1)&categoryId=@currentCategoryId&venueId=@currentVenueId&date=@currentDateString&search=@currentSearch" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>

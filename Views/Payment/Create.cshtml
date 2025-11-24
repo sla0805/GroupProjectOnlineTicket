@@ -1,0 +1,123 @@
+﻿@model OnlineTicket.Models.Payment
+@{
+    ViewData["Title"] = "Secure Checkout (Step 2)";
+    // These variables are correctly read from the ViewBag populated in the Controller
+    var eventTitle = ViewBag.EventTitle;
+    var eventImage = ViewBag.EventImage;
+    var venueName = ViewBag.VenueName;
+    var eventDate = (DateTime)ViewBag.EventDate;
+    var eventId = ViewBag.EventId;
+}
+
+<link rel="stylesheet" href="~/css/booking.css" />
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+
+            <div class="card single-page-checkout-card shadow-lg border-0 overflow-hidden">
+                <div class="row g-0">
+
+                    <div class="col-lg-5 event-sidebar-wrapper">
+                        <div class="event-image-container h-100">
+                            <img src="@(eventImage ?? "https://via.placeholder.com/600x400?text=Event+Image")"
+                                 class="event-img-cover"
+                                 alt="@eventTitle" />
+
+                            <div class="event-overlay">
+                                <span class="badge bg-white text-primary mb-2 shadow-sm">Your Order Summary</span>
+                                <h3 class="fw-bold mb-1">@eventTitle</h3>
+
+                                <div class="d-flex align-items-center mt-2 text-white-50 small">
+                                    <i class="bi bi-geo-alt me-1"></i> @(venueName)
+                                </div>
+                                <div class="d-flex align-items-center mt-1 text-white-50 small">
+                                    <i class="bi bi-calendar3 me-1"></i> @(eventDate.ToString("MMM dd, yyyy @ hh:mm tt"))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7 p-4 p-md-5">
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="fw-bold text-dark mb-0">Secure Payment Details</h4>
+                            <div class="text-muted small">Step 2 of 2</div>
+                        </div>
+
+                        <form asp-action="Create" method="post">
+                            <input type="hidden" asp-for="BookingId" />
+                            <input type="hidden" asp-for="Amount" />
+
+                            <div class="payment-header">
+                                <small class="text-white-50 text-uppercase fw-bold">Total Amount</small>
+                                <div class="amount-display">@Model.Amount.ToString("C")</div>
+                                <div class="badge bg-white text-primary rounded-pill px-3">
+                                    Booking ID: #@Model.BookingId
+                                </div>
+                            </div>
+
+                            <div class="card-body p-0 pt-4">
+                                <label class="form-label text-muted small fw-bold mb-3">Select Payment Method</label>
+                                <div class="payment-methods-grid">
+                                    <input type="radio" class="btn-check" asp-for="PaymentMethod" id="pm_visa" value="Visa" checked>
+                                    <label class="payment-method-tile" for="pm_visa">
+                                        <i class="bi bi-credit-card-2-front method-icon"></i>
+                                        <span class="method-name">Visa</span>
+                                    </label>
+
+                                    <input type="radio" class="btn-check" asp-for="PaymentMethod" id="pm_master" value="MasterCard">
+                                    <label class="payment-method-tile" for="pm_master">
+                                        <i class="bi bi-credit-card method-icon"></i>
+                                        <span class="method-name">MasterCard</span>
+                                    </label>
+                                </div>
+                                <span asp-validation-for="PaymentMethod" class="text-danger small d-block mb-4"></span>
+
+                                <hr class="my-4 text-muted opacity-25">
+
+                                <h6 class="fw-bold mb-3">Card Details</h6>
+
+                                <div class="form-floating mb-3">
+                                    <input asp-for="CardNumber" class="form-control" placeholder="0000 0000 0000 0000" id="cardInput" maxlength="19" required />
+                                    <label for="cardInput"><i class="bi bi-credit-card-fill me-2"></i>Card Number</label>
+                                    <span asp-validation-for="CardNumber" class="text-danger small"></span>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <input asp-for="ExpiryDate" class="form-control" placeholder="MM/YY" id="expiryInput" maxlength="5" required />
+                                            <label for="expiryInput">Expiry (MM/YY)</label>
+                                        </div>
+                                        <span asp-validation-for="ExpiryDate" class="text-danger small"></span>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <input asp-for="CVV" type="password" class="form-control" placeholder="123" id="cvvInput" maxlength="4" required />
+                                            <label for="cvvInput"><i class="bi bi-lock-fill me-1"></i> CVV</label>
+                                        </div>
+                                        <span asp-validation-for="CVV" class="text-danger small"></span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center pt-4 mt-3">
+                                    <a asp-controller="Booking"
+                                       asp-action="Create"
+                                       asp-route-eventId="@eventId"
+                                       class="btn btn-light rounded-pill px-4 fw-bold">
+                                        Go Back
+                                    </a>
+                                    <button type="submit" class="btn btn-pay btn-lg ">
+                                        Pay @Model.Amount.ToString("C")
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

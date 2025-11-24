@@ -14,9 +14,8 @@ namespace OnlineTicket.Models
 
         public int? TicketTypeId { get; set; }
         public TicketType TicketType { get; set; }
+        public string QrBase64 { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public string SeatNumber { get; set; }
-
-        public string QRCode { get; set; }
     }
 }

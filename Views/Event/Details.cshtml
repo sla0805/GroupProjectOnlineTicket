@@ -1,0 +1,22 @@
+﻿@model OnlineTicket.Models.Event
+@{
+    ViewBag.Title = Model.Title;
+}
+
+<h2>@Model.Title</h2>
+<img src="@Model.ImagePath" alt="@Model.Title" style="max-width:400px;" />
+<p>@Model.Description</p>
+<p>Date: @Model.EventDate.ToShortDateString()</p>
+<p>Category: @Model.Category.Name</p>
+<p>Venue: @Model.Venue.Name</p>
+<p>Ticket Price: @Model.TicketPrice.ToString("C")</p>
+
+<h3>Ticket Types:</h3>
+<ul>
+    @foreach (var tt in Model.TicketTypes)
+    {
+        <li>@tt.Name - @tt.Price.ToString("C") - Available Seats: @tt.TotalSeats</li>
+    }
+</ul>
+
+<a asp-controller="Booking" asp-action="Create" asp-route-eventId="@Model.EventId">Book Now</a>

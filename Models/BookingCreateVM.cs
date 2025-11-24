@@ -4,30 +4,39 @@ namespace OnlineTicket.Models
 {
     public class BookingCreateVM
     {
-        [Required]
-        public int EventId { get; set; } 
 
-        public string Title { get; set; }  //EventName
-
-        [Required]
-        [Range(1, 10, ErrorMessage = "You can book 1 to 10 tickets at a time.")]
-        public int Quantity { get; set; }  
+        public int EventId { get; set; }
+        public string EventTitle { get; set; }
 
         [Required]
-        public int TicketTypeId { get; set; }  
-        public string TicketTypeName { get; set; }  
-        public decimal TicketPrice { get; set; }  
+        public int TicketTypeId { get; set; }
 
-        public decimal TotalAmount { get; set; } 
-
-        public string CustomerFullName { get; set; }  
-        public string CustomerPhone { get; set; }     
-
-        public string PaymentMethod { get; set; }  // e.g., Card, PayPal
+        [Required]
+        [Range(1, int.MaxValue)]
+        public int Quantity { get; set; }
 
         public int? PromotionId { get; set; }
-        public string PromotionCode { get; set; }
 
-        public List<TicketType> TicketTypes { get; set; } = new();
+        public List<TicketTypeDropdownItem> TicketTypes { get; set; } = new();
+        public List<PromotionDropdownItem> AvailablePromotions { get; set; } = new();
+    }
+
+    public class TicketTypeDropdownItem
+    {
+        public int TicketTypeId { get; set; }
+        public string Name { get; set; }
+        public decimal Price { get; set; }
+        public int TotalSeats { get; set; }
+    }
+
+    public class PromotionDropdownItem
+    {
+        public int PromotionId { get; set; }
+        public string Name { get; set; }
+        public decimal DiscountPercentage { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public int TicketTypeId { get; set; }
+
     }
 }

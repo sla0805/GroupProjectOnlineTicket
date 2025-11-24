@@ -8,14 +8,31 @@ namespace OnlineTicket.Models
         public int BookingId { get; set; }
 
         [Required]
-        [Display(Name = "Payment Method")]
-        public string Provider { get; set; } // Card, PayPal, etc.
-
-        [Required]
-        [Display(Name = "Amount to Pay")]
-        [Range(0.01, 1000000, ErrorMessage = "Amount must be positive.")]
+        [Display(Name = "Amount")]
         public decimal Amount { get; set; }
 
-        public string Reference { get; set; } // Generated automatically
+        [Required]
+        [Display(Name = "Payment Method")]
+        public string PaymentMethod { get; set; }
+
+        [Required]
+        [Display(Name = "Card Number")]
+        public string CardNumber { get; set; }
+
+        [Required]
+        [Display(Name = "Expiry Date (MM/YY)")]
+        public string ExpiryDate { get; set; }
+
+        [Required]
+        [Display(Name = "CVV")]
+        public string CVV { get; set; }
+
+        // Event details for display in view
+        public string EventTitle { get; set; }
+        public string EventImage { get; set; }
+        public string VenueName { get; set; }
+        public DateTime EventDate { get; set; }
+        public int EventId { get; set; }
+
     }
 }

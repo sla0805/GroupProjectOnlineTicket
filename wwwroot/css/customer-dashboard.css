@@ -1,0 +1,58 @@
+﻿/* Dashboard Specific Background */
+body {
+    background-color: #f8f9fa;
+}
+
+/* Modern Card Styling */
+.card {
+    border: none;
+    border-radius: 1rem; /* equivalent to rounded-4 */
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+
+/* Stat Typography */
+.card-stat-number {
+    font-weight: 700;
+    color: #4e73df;
+    font-size: 3.5rem; /* Large display size */
+    margin-top: 1rem;
+}
+
+/* Quick Action Buttons */
+.action-btn {
+    border-radius: 50px;
+    padding: 10px 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+/* Table Styling */
+.table thead th {
+    background-color: #f8f9fa;
+    border-top: none;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(78, 115, 223, 0.05);
+}
+
+/* Status Badge Styling */
+.status-badge {
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}

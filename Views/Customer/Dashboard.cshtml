@@ -5,98 +5,108 @@
     ViewData["Title"] = "Customer Dashboard";
 }
 
+<link rel="stylesheet" href="~/css/customer-dashboard.css" />
+
 <div class="container py-5">
-    <h2 class="mb-4">Welcome to your Dashboard</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark">Welcome to your Dashboard</h2>
+        <span class="text-muted">@DateTime.Now.ToString("MMMM dd, yyyy")</span>
+    </div>
 
-    <!-- Summary Cards -->
-    <div class="row mb-4">
+    <div class="row mb-4 g-4">
         <div class="col-md-4">
-            <div class="card text-center shadow-sm p-3">
+            <div class="card text-center shadow-sm p-4 h-100 rounded-4">
                 <div class="card-body">
-                    <h5 class="card-title">Total Bookings</h5>
-                    <h2 class="card-text">@Model.TotalBookings</h2>
+                    <h5 class="card-title text-muted text-uppercase small fw-bold">Total Bookings</h5>
+                    <h2 class="card-text display-4 mt-3">@Model.TotalBookings</h2>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card text-center shadow-sm p-3">
+            <div class="card text-center shadow-sm p-4 h-100 rounded-4">
                 <div class="card-body">
-                    <h5 class="card-title">Upcoming Events</h5>
-                    <h2 class="card-text">@Model.UpcomingEvents.Count</h2>
+                    <h5 class="card-title text-muted text-uppercase small fw-bold">Upcoming Events</h5>
+                    <h2 class="card-text display-4 mt-3">@Model.UpcomingEvents.Count</h2>
                 </div>
             </div>
         </div>
 
         <div class="col-md-4">
-            <div class="card text-center shadow-sm p-3">
+            <div class="card text-center shadow-sm p-4 h-100 rounded-4">
                 <div class="card-body">
-                    <h5 class="card-title">Recent Bookings</h5>
-                    <h2 class="card-text">@Model.RecentBookings.Count</h2>
+                    <h5 class="card-title text-muted text-uppercase small fw-bold">Recent Bookings</h5>
+                    <h2 class="card-text display-4 mt-3">@Model.RecentBookings.Count</h2>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Actions -->
     <div class="row mb-4">
         <div class="col-md-12">
-            <div class="card shadow-sm p-3">
-                <div class="card-body d-flex justify-content-around flex-wrap">
-                    <a asp-controller="Event" asp-action="Index" class="btn btn-primary m-2">
-                        <i class="bi bi-search me-1"></i> Browse Events
+            <div class="card shadow-sm p-4 border-0 rounded-4">
+                <div class="card-body d-flex justify-content-center gap-3 flex-wrap">
+                    <a asp-controller="Event" asp-action="Index" class="btn btn-primary btn-lg action-btn m-2 shadow-sm">
+                        <i class="bi bi-search me-2"></i> Browse Events
                     </a>
-                    <a asp-controller="Booking" asp-action="MyBookings" class="btn btn-success m-2">
-                        <i class="bi bi-card-list me-1"></i> My Booking List
+                    <a asp-controller="Booking" asp-action="MyBookings" class="btn btn-success btn-lg action-btn m-2 shadow-sm">
+                        <i class="bi bi-card-list me-2"></i> My Booking List
                     </a>
-                    <a asp-controller="Customer" asp-action="Profile" class="btn btn-warning m-2">
-                        <i class="bi bi-person-circle me-1"></i> Edit Profile
+                    <a asp-controller="Customer" asp-action="Profile" class="btn btn-warning btn-lg action-btn m-2 text-white shadow-sm">
+                        <i class="bi bi-person-circle me-2"></i> Edit Profile
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Recent Bookings Table -->
     <div class="row">
         <div class="col-md-12">
-            <div class="card shadow-sm p-3">
+            <div class="card shadow-sm p-2 border-0 rounded-4">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Recent Bookings</h5>
+                    <h5 class="card-title mb-4 fw-bold ps-2">Recent Bookings</h5>
 
                     @if (Model.RecentBookings.Count == 0)
                     {
-                        <p>You have no recent bookings.</p>
+                        <div class="text-center py-4">
+                            <p class="text-muted">You have no recent bookings.</p>
+                        </div>
                     }
                     else
                     {
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Event</th>
-                                    <th>Booking Date</th>
-                                    <th>Payment Status</th>
-                                    <th>Tickets</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var booking in Model.RecentBookings)
-                                {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
                                     <tr>
-                                        <td>@booking.Event.Title</td>
-                                        <td>@booking.CreatedAt.ToString("MMM dd, yyyy")</td>
-                                        <td>@booking.PaymentStatus</td>
-                                        <td>@booking.Tickets.Count</td>
-                                        <td>
-                                            <a asp-controller="Booking" asp-action="MyBookings" asp-route-id="@booking.BookingId" class="btn btn-sm btn-info">
-                                                View
-                                            </a>
-                                        </td>
+                                        <th>Event</th>
+                                        <th>Booking Date</th>
+                                        <th>Payment Status</th>
+                                        <th>Tickets</th>
+                                        <th>Action</th>
                                     </tr>
-                                }
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    @foreach (var booking in Model.RecentBookings)
+                                    {
+                                        <tr>
+                                            <td class="fw-bold text-primary">@booking.Event.Title</td>
+                                            <td>@booking.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                            <td>
+                                                <span class="badge bg-light text-dark border">
+                                                    @booking.BookingStatus
+                                                </span>
+                                            </td>
+                                            <td>@booking.Tickets.Count</td>
+                                            <td>
+                                                <a asp-controller="Booking" asp-action="MyBookings" asp-route-id="@booking.BookingId" class="btn btn-sm btn-outline-info rounded-pill px-3">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
                     }
                 </div>
             </div>

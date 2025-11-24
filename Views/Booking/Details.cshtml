@@ -1,0 +1,109 @@
+﻿@model OnlineTicket.Models.Booking
+@{
+    ViewBag.Title = "Booking Details";
+}
+
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Booking Details</h2>
+        <a asp-controller="Booking" asp-action="MyBookings" class="btn btn-outline-secondary rounded-pill">
+            <i class="bi bi-arrow-left me-1"></i> Back to My Bookings
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Booking & Payment Info -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm rounded-4 p-3 mb-4">
+                <h5 class="fw-bold mb-3">Booking Information</h5>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>Event:</strong> @Model.Event.Title</li>
+                    <li class="list-group-item"><strong>Quantity:</strong> @Model.Quantity</li>
+                    <li class="list-group-item"><strong>Total Amount:</strong> @Model.TotalAmount.ToString("C")</li>
+                    <li class="list-group-item">
+                        <strong>Status:</strong>
+                        @if (Model.BookingStatus == "Pending")
+                        {
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success text-white">Confirmed</span>
+                        }
+                    </li>
+                    <li class="list-group-item"><strong>Booking Date:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")</li>
+                </ul>
+            </div>
+
+            <div class="card shadow-sm rounded-4 p-3">
+                <h5 class="fw-bold mb-3">Payment Information</h5>
+                @if (Model.Payment != null)
+                {
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><strong>Payment Method:</strong> @Model.Payment.PaymentMethod</li>
+                        <li class="list-group-item"><strong>Amount Paid:</strong> @Model.Payment.Amount.ToString("C")</li>
+                        <li class="list-group-item">
+                            <strong>Status:</strong>
+                            @if (Model.Payment.PaymentStatus == "Paid")
+                            {
+                                <span class="badge bg-success text-white">Paid</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            }
+                        </li>
+                        <li class="list-group-item"><strong>Payment Date:</strong> @Model.Payment.PaymentDate.ToString("MMM dd, yyyy HH:mm")</li>
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">No payment information available.</p>
+                }
+            </div>
+        </div>
+
+        <!-- Right Column: Ticket Details with QR -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm rounded-4 p-3">
+                <h5 class="fw-bold mb-3">Tickets</h5>
+                @if (Model.Tickets != null && Model.Tickets.Any())
+                {
+                    <div class="row row-cols-1 row-cols-md-2 g-3">
+                        @foreach (var ticket in Model.Tickets)
+                        {
+                            <div class="col">
+                                <div class="card border rounded-3 shadow-sm p-3 h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="fw-bold text-primary mb-2">@ticket.TicketType.Name </h6>
+                                        <p class="text-muted mb-2">Ticket ID: @ticket.TicketId</p>
+                                        <img src="@ticket.QrBase64" alt="QR Code" class="img-fluid mb-2" style="max-width:150px;">
+                                        <p class="text-muted mb-0">Event: @ticket.Event.Title </p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center">No tickets available for this booking.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.4em 0.8em;
+        border-radius: 1rem;
+    }
+
+    .card h5 {
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+</style>
