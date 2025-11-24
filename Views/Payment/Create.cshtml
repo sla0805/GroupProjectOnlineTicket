@@ -1,4 +1,4 @@
-﻿@model OnlineTicket.Models.Payment 
+﻿@model OnlineTicket.Models.Payment
 @{
     ViewData["Title"] = "Secure Checkout (Step 2)";
     // These variables are correctly read from the ViewBag populated in the Controller
@@ -21,8 +21,8 @@
                     <div class="col-lg-5 event-sidebar-wrapper">
                         <div class="event-image-container h-100">
                             <img src="@(eventImage ?? "https://via.placeholder.com/600x400?text=Event+Image")"
-                                                   class="event-img-cover"
-                                                   alt="@eventTitle" />
+                                 class="event-img-cover"
+                                 alt="@eventTitle" />
 
                             <div class="event-overlay">
                                 <span class="badge bg-white text-primary mb-2 shadow-sm">Your Order Summary</span>
@@ -106,7 +106,7 @@
                                        asp-action="Create"
                                        asp-route-eventId="@eventId"
                                        class="btn btn-light rounded-pill px-4 fw-bold">
-                                        Go Back 
+                                        Go Back
                                     </a>
                                     <button type="submit" class="btn btn-pay btn-lg ">
                                         Pay @Model.Amount.ToString("C")

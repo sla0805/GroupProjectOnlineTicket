@@ -42,7 +42,7 @@ public class PaymentController : Controller
     }
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create( Payment payment)
+    public async Task<IActionResult> Create(Payment payment)
     {
         var booking = await _db.Bookings
                                   .Include(b => b.Tickets)
@@ -60,7 +60,7 @@ public class PaymentController : Controller
             PaymentStatus = "Paid",
             PaymentDate = DateTime.UtcNow,
 
-           
+
         };
 
         _db.Payments.Add(pay);

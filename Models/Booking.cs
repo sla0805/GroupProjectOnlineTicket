@@ -15,11 +15,15 @@ namespace OnlineTicket.Models
         public Event Event { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
+        
         public int Quantity { get; set; }
 
         [Column(TypeName = "decimal(18,2)")]  
         public decimal TotalAmount { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal DiscountAmount { get; set; } = 0m;
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal FinalAmount { get; set; } = 0m;
         public string BookingStatus { get; set; } = "Pending";
 
         public int? PromotionId { get; set; }

@@ -5,6 +5,7 @@
 }
 
 <link rel="stylesheet" href="~/css/booking.css" />
+<script src="~/js/booking.js"></script>
 
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -23,10 +24,10 @@
                                 <span class="badge bg-primary mb-2 shadow-sm">Event Details</span>
                                 <h3 class="fw-bold mb-1">@Model.EventTitle</h3>
                                 <div class="d-flex align-items-center mt-2 text-white-50 small">
-                                    <i class="bi bi-geo-alt me-1"></i> @(ViewBag.VenueName ?? "Venue TBA")
+                                    <i class="bi bi-geo-alt me-1"></i> @(ViewBag.VenueName)
                                 </div>
                                 <div class="d-flex align-items-center mt-1 text-white-50 small">
-                                    <i class="bi bi-calendar3 me-1"></i> @(((DateTime?)ViewBag.EventDate)?.ToString("MMM dd, yyyy • hh:mm tt") ?? "Date TBA")
+                                    <i class="bi bi-calendar3 me-1"></i> @(((DateTime?)ViewBag.EventDate)?.ToString("MMM dd, yyyy • hh:mm tt"))
                                 </div>
                             </div>
                         </div>
@@ -44,7 +45,9 @@
                                 <input type="hidden" asp-for="EventTitle" />
 
                                 <div class="mb-4">
-                                    <label class="form-label text-muted small fw-bold text-uppercase mb-2 ps-1">Select Ticket Class</label>
+                                    <label class="form-label text-muted small fw-bold text-uppercase mb-2 ps-1">
+                                        Select Ticket Class
+                                    </label>
 
                                     <div class="ticket-selector-grid">
                                         @foreach (var tt in Model.TicketTypes)
@@ -68,11 +71,17 @@
                                                     <div class="ticket-info">
                                                         @if (tt.TotalSeats < 10 && tt.TotalSeats > 0)
                                                         {
-                                                            <span class="text-warning fw-bold"><i class="bi bi-exclamation-circle me-1"></i> Only @tt.TotalSeats left!</span>
+                                                            <span class="text-warning fw-bold">
+                                                                <i class="bi bi-exclamation-circle me-1"></i>
+                                                                Only @tt.TotalSeats left!
+                                                            </span>
                                                         }
                                                         else
                                                         {
-                                                            <span><i class="bi bi-people me-1"></i> @tt.TotalSeats seats available</span>
+                                                            <span>
+                                                                <i class="bi bi-people me-1"></i>
+                                                                @tt.TotalSeats seats available
+                                                            </span>
                                                         }
                                                     </div>
                                                 </label>
@@ -83,7 +92,7 @@
                                 </div>
 
                                 <div class="form-floating mb-4">
-                                    <input asp-for="Quantity" type="number" class="form-control" id="qtyInput" min="1" value="1" placeholder="1" required />
+                                    <input asp-for="Quantity" type="number" class="form-control" id="qtyInput" min="1" value="1" required />
                                     <label for="qtyInput">Quantity</label>
                                 </div>
 
@@ -98,7 +107,9 @@
                                                 <option value="">No Promotion applied</option>
                                                 @foreach (var p in Model.AvailablePromotions)
                                                 {
-                                                    <option value="@p.PromotionId">@p.Name (-@p.DiscountPercentage.ToString("0")%)</option>
+                                                    <option value="@p.PromotionId">
+                                                        @p.Name (-@p.DiscountPercentage.ToString("0")%)
+                                                    </option>
                                                 }
                                             </select>
                                             <label for="promoSelect">Select Promotion</label>
@@ -109,12 +120,15 @@
                                 <hr class="my-4 text-muted opacity-25">
 
                                 <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                    <a asp-controller="Event" asp-action="Index" asp-route-id="@Model.EventId" class="btn btn-light rounded-pill px-4 fw-bold">Cancel</a>
+                                    <a asp-controller="Event" asp-action="Index" asp-route-id="@Model.EventId"
+                                       class="btn btn-light rounded-pill px-4 fw-bold">Cancel</a>
+
                                     <button type="submit" class="btn btn-primary-modern px-5">
                                         Confirm Booking <i class="bi bi-arrow-right ms-2"></i>
                                     </button>
                                 </div>
                             </form>
+
                         </div>
                     </div>
 
