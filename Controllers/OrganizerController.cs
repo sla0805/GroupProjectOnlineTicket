@@ -58,7 +58,7 @@ namespace OnlineTicket.Controllers
                 Title = e.Title,
                 EventDate = e.EventDate,
                 TotalTicketsSold = e.Bookings.Sum(b => b.Tickets.Count),
-                TotalRevenue = e.Bookings.Sum(b => b.Payment.Amount),
+                TotalRevenue = e.Bookings.Sum(b => b.Payment?.Amount?? 0),
                 TotalSeatsAvailable = e.TotalSeats - e.Bookings.Sum(b => b.Tickets.Count)
             }).ToList();
 

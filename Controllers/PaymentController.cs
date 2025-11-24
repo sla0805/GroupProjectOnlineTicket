@@ -31,7 +31,7 @@ public class PaymentController : Controller
         ViewBag.EventDate = booking.Event.EventDate;
         ViewBag.EventId = booking.Event.EventId;
         // Create a Payment object and set BookingId and Amount
-        var payment = new Payment
+        var payment = new PaymentVM
         {
             BookingId = booking.BookingId,
             Amount = booking.TotalAmount
@@ -42,21 +42,25 @@ public class PaymentController : Controller
     }
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Payment payment)
+    public async Task<IActionResult> Create(PaymentVM payment)
     {
         var booking = await _db.Bookings
                                   .Include(b => b.Tickets)
                                   .FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
         if (booking == null) return NotFound();
+        decimal finalAmount = booking.TotalAmount;
+        if (!string.IsNullOrEmpty(payment.PromotionCode))
+        {
+            // Example: 10% discount if any promo code
+            finalAmount *= 0.9m;
+        }
 
         var pay = new Payment
         {
             BookingId = booking.BookingId,
-            Amount = booking.TotalAmount,
+            Amount = booking.FinalAmount,
             PaymentMethod = payment.PaymentMethod,
-            CardNumber = payment.CardNumber,
-            ExpiryDate = payment.ExpiryDate,
-            CVV = payment.CVV,
+           
             PaymentStatus = "Paid",
             PaymentDate = DateTime.UtcNow,
 

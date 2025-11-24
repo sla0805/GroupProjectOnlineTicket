@@ -41,7 +41,7 @@
                 {
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item"><strong>Payment Method:</strong> @Model.Payment.PaymentMethod</li>
-                        <li class="list-group-item"><strong>Amount Paid:</strong> @Model.Payment.Amount.ToString("C")</li>
+                        <li class="list-group-item"><strong>Amount Paid:</strong> @Model.TotalAmount.ToString("C")</li>
                         <li class="list-group-item">
                             <strong>Status:</strong>
                             @if (Model.Payment.PaymentStatus == "Paid")

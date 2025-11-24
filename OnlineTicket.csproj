@@ -24,8 +24,4 @@
     <PackageReference Include="QRCoder" Version="1.7.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\images\events\" />
-  </ItemGroup>
-
 </Project>

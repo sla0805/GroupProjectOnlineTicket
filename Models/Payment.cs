@@ -19,18 +19,7 @@ namespace OnlineTicket.Models
         [Required]
         public string PaymentMethod { get; set; }
 
-        [Required]
-        [MaxLength(16)]
-        public string CardNumber { get; set; }
-
-        [Required]
-        [MaxLength(5)]
-        public string ExpiryDate { get; set; } // MM/YY
-
-        [Required]
-        [MaxLength(3)]
-        public string CVV { get; set; }
-
+      
         [Required]
         public string PaymentStatus { get; set; } = "Pending";
 

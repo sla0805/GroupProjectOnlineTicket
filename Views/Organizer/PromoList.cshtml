@@ -1,81 +1,81 @@
 ﻿@using System.Linq
 @model IEnumerable<OnlineTicket.ViewModels.PromotionViewModel>
-<div class="container mt-8">
+
+<div class="max-w-6xl mx-auto mt-10 px-4">
 
     <!-- TempData Messages -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="bg-green-100 text-green-800 p-3 rounded mb-4 flex justify-between items-center shadow">
+        <div class="bg-green-100 text-green-800 p-4 rounded-lg mb-6 flex justify-between items-center shadow">
             <span>@TempData["SuccessMessage"]</span>
             <button type="button" class="ml-4 font-bold text-lg" onclick="this.parentElement.style.display='none'">×</button>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="bg-red-100 text-red-800 p-3 rounded mb-4 flex justify-between items-center shadow">
+        <div class="bg-red-100 text-red-800 p-4 rounded-lg mb-6 flex justify-between items-center shadow">
             <span>@TempData["ErrorMessage"]</span>
             <button type="button" class="ml-4 font-bold text-lg" onclick="this.parentElement.style.display='none'">×</button>
         </div>
     }
 
     <!-- Header Section -->
-    <div class="mb-8 p-6 rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-400 text-white shadow-xl hover:shadow-2xl transition duration-500 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+    <div class="mb-8 p-6 rounded-2xl bg-gradient-to-r from-indigo-500 to-indigo-400 text-white shadow-xl hover:shadow-2xl transition duration-500 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
         <div class="text-center md:text-left">
-            <h1 class="text-4xl md:text-5xl font-extrabold drop-shadow-lg mb-2">
-                Manage Promotions
-            </h1>
-            <p class="text-lg md:text-xl font-medium drop-shadow-sm">
-                View, add, edit, or delete promotional codes for your events and ticket types.
-            </p>
+            <h1 class="text-4xl md:text-5xl font-extrabold drop-shadow-lg mb-2">Manage Promotions</h1>
+            <p class="text-lg md:text-xl font-medium drop-shadow-sm">View, add, edit, or delete promotional codes for your events and ticket types.</p>
         </div>
-        <div class="flex gap-3 flex-wrap justify-center md:justify-start mt-4 md:mt-0">
-            <a asp-action="AddPromotion" class="inline-flex items-center px-6 py-3 bg-green-600 rounded-lg shadow-lg hover:bg-green-700 hover:scale-105 transition transform font-semibold text-lg">
+        <div class="flex gap-3 justify-center md:justify-start mt-4">
+            <a asp-action="AddPromotion"
+               class="inline-flex items-center px-4 py-2 bg-green-600 rounded-lg shadow hover:bg-green-700 hover:scale-105 transition transform text-sm font-semibold">
                 <i class="fa-solid fa-plus mr-2"></i> Add Promotion
             </a>
-            <a asp-action="Dashboard" asp-controller="Organizer" class="inline-flex items-center px-6 py-3 bg-gray-700 rounded-lg shadow-lg hover:bg-gray-800 hover:scale-105 transition transform font-semibold text-lg">
-                <i class="fa-solid fa-arrow-left mr-2"></i> Back to Dashboard
-            </a>
         </div>
+
     </div>
 
-    <!-- Promotions Table Card -->
-    <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-dark">
+    <!-- Promotions Table -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-100">
                 <tr>
-                    <th>Name</th>
-                    <th>Code</th>
-                    <th>Discount (%)</th>
-                    <th>Event</th>
-                    <th>Ticket Type</th>
-                    <th>Status</th>
-                    <th class="text-center">Actions</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Code</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Discount (%)</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Event</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Ticket Type</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
+                    <th class="px-4 py-2 text-center text-sm font-medium text-gray-700">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-200">
                 @foreach (var promo in Model)
                 {
                     <tr class="hover:bg-gray-50 transition">
-                        <td class="fw-bold">@promo.Name</td>
-                        <td>@promo.Code</td>
-                        <td>@promo.DiscountPercentage %</td>
-                        <td>@promo.EventName</td>
-                        <td>@promo.TicketTypeName</td>
-                        <td>
+                        <td class="px-4 py-2 font-semibold">@promo.Name</td>
+                        <td class="px-4 py-2">@promo.Code</td>
+                        <td class="px-4 py-2">@promo.DiscountPercentage %</td>
+                        <td class="px-4 py-2">@promo.EventName</td>
+                        <td class="px-4 py-2">@promo.TicketTypeName</td>
+                        <td class="px-4 py-2">
                             @if (promo.IsActive)
                             {
-                                <span class="badge bg-success">Active</span>
+                                <span class="px-2 py-1 bg-green-200 text-green-800 rounded-full text-sm font-medium">Active</span>
                             }
                             else
                             {
-                                <span class="badge bg-secondary">Inactive</span>
+                                <span class="px-2 py-1 bg-gray-200 text-gray-800 rounded-full text-sm font-medium">Inactive</span>
                             }
                         </td>
-                        <td class="text-center flex gap-1 justify-center">
-                            <a asp-action="EditPromotion" asp-route-id="@promo.PromotionId" class="btn btn-sm btn-primary hover:scale-105 transition transform">Edit</a>
+                        <td class="px-4 py-2 text-center flex gap-2 justify-center">
+                            <a asp-action="EditPromotion" asp-route-id="@promo.PromotionId" class="px-3 py-1 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 hover:scale-105 transition transform text-sm">
+                                Edit
+                            </a>
                             <form asp-action="DeletePromotion" method="post" onsubmit="return confirm('Are you sure you want to delete this promotion?');">
                                 <input type="hidden" name="id" value="@promo.PromotionId" />
-                                <button type="submit" class="btn btn-sm btn-danger hover:scale-105 transition transform">Delete</button>
+                                <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 hover:scale-105 transition transform text-sm">
+                                    Delete
+                                </button>
                             </form>
                         </td>
                     </tr>
@@ -87,5 +87,11 @@
         {
             <p class="text-gray-500 text-center mt-4 italic">No promotions available. Click "Add Promotion" to create one.</p>
         }
+    </div>
+    <div class="mt-8 text-center">
+        <a asp-action="Dashboard" asp-controller="Organizer"
+           class="inline-flex items-center px-6 py-3 bg-gray-700 rounded-lg shadow hover:bg-gray-800 hover:scale-105 transition transform text-white font-semibold">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
     </div>
 </div>

@@ -33,6 +33,8 @@ namespace OnlineTicket.Models
         public string VenueName { get; set; }
         public DateTime EventDate { get; set; }
         public int EventId { get; set; }
+        [MaxLength(20)]
+        public string PromotionCode { get; set; }
 
     }
 }
