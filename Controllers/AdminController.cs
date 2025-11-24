@@ -356,6 +356,58 @@ namespace OnlineTicket.Controllers
             return RedirectToAction("Organizers");
         }
 
+        // Event list with search and pagination
+        public async Task<IActionResult> Events(string search, int page = 1, int pageSize = 10)
+        {
+            var query = _context.Events
+                .Include(e => e.Category)
+                .Include(e => e.Venue)
+                .Include(e => e.Organizer)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                search = search.ToLower();
+                query = query.Where(e =>
+                    e.Title.ToLower().Contains(search) ||
+                    e.Category.Name.ToLower().Contains(search) ||
+                    e.Venue.Name.ToLower().Contains(search) ||
+                    e.Organizer.OrganizerName.ToLower().Contains(search));
+            }
+
+            var eventsList = await query
+                .OrderByDescending(e => e.EventDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var totalCount = await query.CountAsync();
+
+            var pagedResult = new PagedResult<Event>
+            {
+                Items = eventsList,
+                Page = page,
+                PageSize = pageSize,
+                TotalItems = totalCount
+            };
+
+            ViewBag.Search = search;
+
+            return View(pagedResult);
+        }
+
+        // Delete Event
+        [HttpPost]
+        public async Task<IActionResult> DeleteEvent(int eventId)
+        {
+            var ev = await _context.Events.FindAsync(eventId);
+            if (ev != null)
+            {
+                _context.Events.Remove(ev);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Events");
+        }
 
         [HttpPost]
         public async Task<IActionResult> ToggleUserStatus(string userId)

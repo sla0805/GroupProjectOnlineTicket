@@ -20,15 +20,18 @@
             <!-- Brand -->
             <div class="flex items-center space-x-2">
                 <a asp-controller="Home" asp-action="Index" class="flex items-center font-bold text-lg">
-                    <i class="fa-solid fa-ticket"></i>
-                    <span>StarEvents</span>
+                    <i class="fa-solid fa-ticket mr-2"></i>
+                    <span>Star Events</span>
                 </a>
             </div>
+
 
             <!-- Desktop Menu -->
             <div class="hidden md:flex items-center space-x-6">
                 <a asp-controller="Home" asp-action="Index" class="hover:text-gray-300">Home</a>
-                <a asp-controller="Event" asp-action="Index" class="hover:text-gray-300">Events</a>
+                <a asp-controller="Home" asp-action="AboutUs" class="hover:text-gray-300">About Us</a>
+                <a asp-controller="Home" asp-action="Contact" class="hover:text-gray-300">Contact</a>
+                <a asp-controller="Home" asp-action="Privacy" class="hover:text-gray-300">Privacy</a>
                 <partial name="_LoginPartial" />
             </div>
 

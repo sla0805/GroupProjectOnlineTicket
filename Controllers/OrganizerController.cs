@@ -36,6 +36,7 @@ namespace OnlineTicket.Controllers
             return organizer?.OrganizerId;
         }
 
+        [Authorize(Roles = "Organizer")]
         public async Task<IActionResult> Dashboard()
         {
             var organizerId = await GetCurrentOrganizerIdAsync();
@@ -886,6 +887,7 @@ namespace OnlineTicket.Controllers
                     p.EndDate >= now
                 );
         }
+
 
         //Report Chart
         public async Task<IActionResult> OrganizerSalesReport(string organizerId)
