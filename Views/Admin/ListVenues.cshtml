@@ -1,0 +1,67 @@
+﻿@model IEnumerable<OnlineTicket.ViewModels.VenueVM>
+@{
+    ViewData["Title"] = "Venues List";
+}
+
+<div class="max-w-7xl mx-auto p-6">
+
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-4xl font-bold text-indigo-600">List of Event Venue</h1>
+        <a asp-action="CreateVenue" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+            <i class="fa-solid fa-plus mr-2"></i> Add New Venue
+        </a>
+    </div>
+
+    <div class="w-full bg-indigo-600 text-white py-8 shadow-lg rounded-b-lg mb-8">
+        <div class="max-w-3xl mx-auto text-center px-4">
+            <p class="mt-2 text-indigo-100 text-lg">
+                Manage Event Venues
+            </p>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <p class="text-gray-500 italic">No venues found.</p>
+    }
+    else
+    {
+        <table class="w-full table-auto border border-gray-200 rounded-lg shadow">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="px-4 py-2 text-left">Name</th>
+                    <th class="px-4 py-2 text-left">Address</th>
+                    <th class="px-4 py-2 text-left">City</th>
+                    <th class="px-4 py-2 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var venue in Model)
+                {
+                    <tr class="border-t border-gray-200 hover:bg-gray-50">
+                        <td class="px-4 py-2">@venue.Name</td>
+                        <td class="px-4 py-2">@venue.Address</td>
+                        <td class="px-4 py-2">@venue.City</td>
+                        <td class="px-4 py-2 text-center space-x-2">
+                            <a asp-action="EditVenue" asp-route-id="@venue.VenueId" class="inline-flex items-center px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">
+                                <i class="fa-solid fa-edit mr-1"></i> Edit
+                            </a>
+                            <form asp-action="DeleteVenue" asp-route-id="@venue.VenueId" method="post" class="inline" onsubmit="return confirm('Are you sure you want to delete this venue?');">
+                                <button type="submit" class="inline-flex items-center px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                                    <i class="fa-solid fa-trash mr-1"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    <!-- Back to Dashboard -->
+    <div class="text-center mt-6">
+        <a asp-controller="Admin" asp-action="Dashboard"
+           class="text-indigo-600 font-semibold hover:underline">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>

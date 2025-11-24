@@ -1,0 +1,41 @@
+﻿@model OnlineTicket.ViewModels.VenueVM
+@{
+    ViewData["Title"] = "Edit Venue";
+}
+
+<div class="max-w-2xl mx-auto p-6 bg-white shadow rounded-lg">
+
+    <h1 class="text-2xl font-bold text-indigo-600 mb-6">Edit Venue</h1>
+
+    <form asp-action="EditVenue" method="post" class="space-y-4">
+        <input type="hidden" asp-for="VenueId" />
+
+        <div>
+            <label asp-for="Name" class="block font-semibold"></label>
+            <input asp-for="Name" class="w-full border px-3 py-2 rounded" />
+            <span asp-validation-for="Name" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Address" class="block font-semibold"></label>
+            <input asp-for="Address" class="w-full border px-3 py-2 rounded" />
+            <span asp-validation-for="Address" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="City" class="block font-semibold"></label>
+            <input asp-for="City" class="w-full border px-3 py-2 rounded" />
+            <span asp-validation-for="City" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div class="flex gap-2">
+            <button type="submit" class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition">Update Venue</button>
+            <a asp-action="ListVenues" asp-controller="Admin" class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 transition">Cancel</a>
+        </div>
+    </form>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,44 +1,44 @@
 ﻿@model OnlineTicket.Models.RegisterViewModel
 @{
     ViewData["Title"] = "Register";
-    // Layout = "_LayoutAuth";
 }
 
-<div class="auth-container">
-    <form asp-action="Register">
-        <h2>Create Account</h2>
-        <p>Join StarEvents today!</p>
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <form asp-action="Register" class="bg-white p-8 rounded-lg shadow-md w-full max-w-md space-y-4">
+        <h2 class="text-2xl font-bold text-gray-800">Create Account</h2>
+        <p class="text-gray-600">Join StarEvents today!</p>
 
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div asp-validation-summary="ModelOnly" class="text-red-600"></div>
 
-        <div class="form-floating">
-            <input asp-for="Email" class="form-control" placeholder="Email" />
-            <label asp-for="Email"></label>
-            <span asp-validation-for="Email" class="text-danger"></span>
+        <!-- Email -->
+        <div class="relative">
+            <input asp-for="Email" class="peer w-full border border-gray-300 rounded px-3 pt-5 pb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder=" " />
+            <label asp-for="Email" class="absolute left-3 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-gray-700 peer-focus:text-sm"></label>
+            <span asp-validation-for="Email" class="text-red-600 text-sm"></span>
         </div>
 
-        <div class="form-floating">
-            <input asp-for="Password" class="form-control" placeholder="Password" />
-            <label asp-for="Password"></label>
-            <span asp-validation-for="Password" class="text-danger"></span>
+        <!-- Password -->
+        <div class="relative">
+            <input asp-for="Password" type="password" class="peer w-full border border-gray-300 rounded px-3 pt-5 pb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder=" " />
+            <label asp-for="Password" class="absolute left-3 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-gray-700 peer-focus:text-sm"></label>
+            <span asp-validation-for="Password" class="text-red-600 text-sm"></span>
         </div>
 
-        <div class="form-floating">
-            <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm Password" />
-            <label asp-for="ConfirmPassword"></label>
-            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        <!-- Confirm Password -->
+        <div class="relative">
+            <input asp-for="ConfirmPassword" type="password" class="peer w-full border border-gray-300 rounded px-3 pt-5 pb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder=" " />
+            <label asp-for="ConfirmPassword" class="absolute left-3 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-gray-700 peer-focus:text-sm"></label>
+            <span asp-validation-for="ConfirmPassword" class="text-red-600 text-sm"></span>
         </div>
-     
 
-        <button type="submit" class="btn btn-auth">Create Account</button>
+        <button type="submit" class="w-full bg-blue-900 text-white py-2 rounded hover:bg-blue-800 transition-colors">Create Account</button>
 
-        <div class="auth-link">
-            <p>Already have an account? <a asp-action="Login">Login here</a></p>
-        </div>
+        <p class="text-gray-600 text-center">
+            Already have an account? <a asp-action="Login" class="text-blue-900 hover:underline">Login here</a>
+        </p>
     </form>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
- 
 }

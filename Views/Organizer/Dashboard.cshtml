@@ -27,8 +27,8 @@
         <p class="text-gray-600 mt-1">Overview of your StarEvents platform performance.</p>
     </div>
     <div class="flex gap-2 flex-wrap">
-        <a asp-action="EditProfile" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">
-            <i class="fa-solid fa-user-edit mr-2"></i> Edit Profile
+        <a asp-controller="Account" asp-action="EditAccount" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition">
+            <i class="fa-solid fa-user-edit mr-2"></i> Edit Your Account
         </a>
         <a asp-controller="Organizer" asp-action="Events" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
             <i class="fa-solid fa-calendar-check mr-2"></i> Manage Events
@@ -92,7 +92,12 @@
             <div class="w-full bg-yellow-200 h-1.5 rounded-full overflow-hidden">
                 <div class="bg-yellow-500 h-1.5 animate-pulse" style="width:@(Math.Min((int)@Model.TotalRevenueAllTime / 1000,100))%"></div>
             </div>
-            <a href="#" class="text-yellow-600 hover:text-yellow-800 text-sm mt-2 inline-block">Generate Sales Report &rarr;</a>
+            <a asp-controller="Organizer"
+               asp-action="OrganizerSalesReport"
+               asp-route-organizerId="@Model.OrganizerId"
+               class="text-yellow-600 hover:text-yellow-800 text-sm mt-2 inline-block">
+                View Sales Report →
+            </a>
         </div>
     </div>
 
@@ -208,6 +213,24 @@
                 View All Promotions →
             </a>
         </div>
+
+    </div>
+
+    <!-- Edit Account Card -->
+    <div class="bg-white p-4 rounded-xl shadow hover:shadow-lg transition border-l-4 border-indigo-500">
+        <div class="flex justify-between items-center mb-3">
+            <div>
+                <h2 class="text-lg font-semibold text-gray-800">Your Profile</h2>
+                <p class="text-gray-500 text-sm">Manage your organizer details: Name, Address, Contact Information</p>
+            </div>
+            <div class="bg-indigo-100 p-3 rounded-full text-indigo-600">
+                <i class="fa-solid fa-user-cog fa-lg"></i>
+            </div>
+        </div>
+        <a asp-controller="Organizer" asp-action="EditProfile"
+           class="inline-flex items-center justify-center w-full mt-5 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+            <i class="fa-solid fa-edit mr-2"></i> Edit Profile
+        </a>
     </div>
 
 </div>

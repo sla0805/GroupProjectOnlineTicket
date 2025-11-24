@@ -88,8 +88,8 @@ namespace OnlineTicket.Controllers
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
 
-                    // Redirect new customers to the homepage
-                    return RedirectToAction("Index", "Home");
+                    // Redirect new customers to the login page
+                    return RedirectToAction("Login", "Account");
                 }
 
                 foreach (var error in result.Errors)
@@ -127,7 +127,7 @@ namespace OnlineTicket.Controllers
                 // --- Role-Based Redirect ---
                 if (roles.Contains("Admin"))
                 {
-                    return RedirectToAction("Contact", "Home");
+                    return RedirectToAction("Dashboard", "Admin");
                 }
                 if (roles.Contains("Organizer"))
                 {
@@ -147,6 +147,138 @@ namespace OnlineTicket.Controllers
 
             ModelState.AddModelError("", "Invalid login attempt");
             return View(model);
+        }
+
+        // Edit Account GET
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> EditAccount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
+            var model = new EditAccountViewModel
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber
+            };
+
+            return View(model);
+        }
+
+        // Edit Account POST
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAccount(EditAccountViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null) return NotFound();
+
+            bool isUpdated = false;
+
+            // Update profile fields
+            if (user.UserName != model.UserName)
+            {
+                var userNameResult = await _userManager.SetUserNameAsync(user, model.UserName);
+                if (userNameResult.Succeeded) isUpdated = true;
+                else
+                {
+                    foreach (var error in userNameResult.Errors)
+                        ModelState.AddModelError("", error.Description);
+                    TempData["ErrorMessage"] = "Failed to update username.";
+                    return View(model);
+                }
+            }
+
+            if (user.Email != model.Email)
+            {
+                var emailResult = await _userManager.SetEmailAsync(user, model.Email);
+                if (emailResult.Succeeded) isUpdated = true;
+                else
+                {
+                    foreach (var error in emailResult.Errors)
+                        ModelState.AddModelError("", error.Description);
+                    TempData["ErrorMessage"] = "Failed to update email.";
+                    return View(model);
+                }
+            }
+
+            if (user.PhoneNumber != model.PhoneNumber)
+            {
+                var phoneResult = await _userManager.SetPhoneNumberAsync(user, model.PhoneNumber);
+                if (phoneResult.Succeeded) isUpdated = true;
+                else
+                {
+                    foreach (var error in phoneResult.Errors)
+                        ModelState.AddModelError("", error.Description);
+                    TempData["ErrorMessage"] = "Failed to update phone number.";
+                    return View(model);
+                }
+            }
+
+            // Update password only if provided
+            if (!string.IsNullOrWhiteSpace(model.NewPassword))
+            {
+                if (string.IsNullOrWhiteSpace(model.CurrentPassword))
+                {
+                    ModelState.AddModelError("CurrentPassword", "Current password is required to change password.");
+                    TempData["ErrorMessage"] = "Current password is required.";
+                    return View(model);
+                }
+
+                var passwordCheck = await _userManager.CheckPasswordAsync(user, model.CurrentPassword);
+                if (!passwordCheck)
+                {
+                    ModelState.AddModelError("CurrentPassword", "Incorrect current password.");
+                    TempData["ErrorMessage"] = "Incorrect current password.";
+                    return View(model);
+                }
+
+                var changePasswordResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+                if (!changePasswordResult.Succeeded)
+                {
+                    foreach (var error in changePasswordResult.Errors)
+                        ModelState.AddModelError("", error.Description);
+                    TempData["ErrorMessage"] = "Failed to change password.";
+                    return View(model);
+                }
+
+                isUpdated = true;
+            }
+
+            if (isUpdated)
+                TempData["SuccessMessage"] = "Account details updated successfully.";
+            else
+                TempData["ErrorMessage"] = "No changes were made.";
+
+            return RedirectToAction("EditAccount");
+        }
+
+
+        //Redirection for cancel button
+        [Authorize]
+        public async Task<IActionResult> CancelEditAccount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Index", "Home");
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            if (roles.Contains("Admin"))
+                return RedirectToAction("Dashboard", "Admin"); 
+            if (roles.Contains("Organizer"))
+                return RedirectToAction("Dashboard", "Organizer");
+            if (roles.Contains("Customer"))
+                return RedirectToAction("Dashboard", "Customer");
+
+            // Fallback
+            return RedirectToAction("Index", "Home");
         }
 
 

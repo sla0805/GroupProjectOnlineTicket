@@ -3,35 +3,38 @@
     ViewData["Title"] = "Log in";
 }
 
-<div class="auth-container">
-    <form asp-action="Login">
-        <h2>Log In</h2>
-        <p>Welcome back to StarEvents!</p>
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <form asp-action="Login" class="bg-white p-8 rounded-lg shadow-md w-full max-w-md space-y-4">
+        <h2 class="text-2xl font-bold text-gray-800">Log In</h2>
+        <p class="text-gray-600">Welcome back to StarEvents!</p>
 
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div asp-validation-summary="ModelOnly" class="text-red-600"></div>
 
-        <div class="form-floating">
-            <input asp-for="Email" class="form-control" placeholder="Email" />
-            <label asp-for="Email"></label>
-            <span asp-validation-for="Email" class="text-danger"></span>
+        <!-- Email -->
+        <div class="relative">
+            <input asp-for="Email" class="peer w-full border border-gray-300 rounded px-3 pt-5 pb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder=" " />
+            <label asp-for="Email" class="absolute left-3 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-gray-700 peer-focus:text-sm"></label>
+            <span asp-validation-for="Email" class="text-red-600 text-sm"></span>
         </div>
 
-        <div class="form-floating">
-            <input asp-for="Password" class="form-control" placeholder="Password" />
-            <label asp-for="Password"></label>
-            <span asp-validation-for="Password" class="text-danger"></span>
+        <!-- Password -->
+        <div class="relative">
+            <input asp-for="Password" type="password" class="peer w-full border border-gray-300 rounded px-3 pt-5 pb-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder=" " />
+            <label asp-for="Password" class="absolute left-3 top-2 text-gray-500 text-sm transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-gray-700 peer-focus:text-sm"></label>
+            <span asp-validation-for="Password" class="text-red-600 text-sm"></span>
         </div>
 
-        <div class="form-check mb-3">
-            <input asp-for="RememberMe" class="form-check-input" />
-            <label asp-for="RememberMe" class="form-check-label"></label>
+        <!-- Remember Me -->
+        <div class="flex items-center space-x-2">
+            <input asp-for="RememberMe" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded" />
+            <label asp-for="RememberMe" class="text-gray-700 text-sm"></label>
         </div>
 
-        <button type="submit" class="btn btn-auth">Login</button>
+        <button type="submit" class="w-full bg-blue-900 text-white py-2 rounded hover:bg-blue-800 transition-colors">Login</button>
 
-        <div class="auth-link">
-            <p>Don't have an account? <a asp-action="Register">Register here</a></p>
-        </div>
+        <p class="text-gray-600 text-center">
+            Don't have an account? <a asp-action="Register" class="text-blue-900 hover:underline">Register here</a>
+        </p>
     </form>
 </div>
 
