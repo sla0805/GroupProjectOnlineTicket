@@ -1,0 +1,139 @@
+﻿@model OnlineTicket.ViewModels.PagedResult<OnlineTicket.ViewModels.UserWithStatsVM>
+@{
+    ViewData["Title"] = "Customers";
+}
+
+<div class="max-w-7xl mx-auto p-6">
+
+    <!-- Header Section with Shadow and Presence -->
+    <div class="bg-white shadow-lg rounded-xl p-6 mb-6">
+        <h1 class="text-5xl font-extrabold text-indigo-600 flex items-center gap-3">
+            <i class="fa-solid fa-users fa-lg"></i> Customer Management
+        </h1>
+        <p class="text-gray-600 mt-2 text-lg">
+            View, search, enable/disable, or delete customer accounts and monitor booking statistics.
+        </p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="mb-6 flex flex-col md:flex-row md:items-center md:gap-4">
+        <form method="get" class="flex gap-2 flex-wrap w-full md:w-auto">
+            <input type="text" name="search" placeholder="Search by name, email, phone"
+                   value="@(ViewBag.Search ?? "")"
+                   class="border px-3 py-2 rounded-lg w-full md:w-64 focus:ring focus:ring-indigo-300 focus:outline-none transition" />
+            <button type="submit"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition shadow">
+                Search
+            </button>
+            <a asp-action="Customers"
+               class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition shadow">
+                Clear
+            </a>
+        </form>
+    </div>
+
+    <!-- Customers Table -->
+    <div class="bg-white p-6 rounded-xl shadow mb-8 overflow-x-auto">
+        @if (Model.Items.Any())
+        {
+            <table class="w-full table-auto border border-gray-200">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-4 py-2 text-left">Full Name</th>
+                        <th class="px-4 py-2 text-left">Email</th>
+                        <th class="px-4 py-2 text-left">Phone</th>
+                        <th class="px-4 py-2 text-right">Bookings</th>
+                        <th class="px-4 py-2 text-center">Status</th>
+                        <th class="px-4 py-2 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var customer in Model.Items)
+                    {
+                        <tr class="border-t border-gray-200 hover:bg-gray-50 transition">
+                            <td class="px-4 py-2 font-medium text-gray-800">@customer.FullName</td>
+                            <td class="px-4 py-2">@customer.Email</td>
+                            <td class="px-4 py-2">@customer.PhoneNumber</td>
+                            <td class="px-4 py-2 text-right font-semibold">@customer.BookingsCount</td>
+                            <td class="px-4 py-2 text-center">
+                                @if (customer.IsEnabled)
+                                {
+                                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">Enabled</span>
+                                }
+                                else
+                                {
+                                    <span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">Disabled</span>
+                                }
+                            </td>
+                            <td class="px-4 py-2 text-center flex justify-center gap-2">
+                                <!-- Enable/Disable Button -->
+                                <form asp-action="ToggleUserStatus" method="post" class="inline" onsubmit="return confirmToggle(this);">
+                                    <input type="hidden" name="userId" value="@customer.UserId" />
+                                    <button type="submit"
+                                            class="px-3 py-1 rounded text-white font-semibold transition
+                                                   @(customer.IsEnabled ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600")">
+                                        @(customer.IsEnabled ? "Disable" : "Enable")
+                                    </button>
+                                </form>
+
+                                <!-- Delete Button -->
+                                <form asp-action="DeleteCustomer" method="post" class="inline" onsubmit="return confirmDelete(this);">
+                                    <input type="hidden" name="userId" value="@customer.UserId" />
+                                    <button type="submit"
+                                            class="px-3 py-1 rounded bg-red-600 text-white font-semibold hover:bg-red-700 transition">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="flex justify-center items-center gap-2 mt-6 flex-wrap">
+                @if (Model.HasPreviousPage)
+                {
+                    <a asp-action="Customers" asp-route-page="@(Model.Page - 1)" asp-route-search="@(ViewBag.Search)"
+                       class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">Previous</a>
+                }
+
+                <span class="px-4 py-2 bg-indigo-600 text-white rounded font-semibold">
+                    Page @Model.Page of @Model.TotalPages
+                </span>
+
+                @if (Model.HasNextPage)
+                {
+                    <a asp-action="Customers" asp-route-page="@(Model.Page + 1)" asp-route-search="@(ViewBag.Search)"
+                       class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition">Next</a>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-gray-500 italic text-center py-6">No customers found.</p>
+        }
+    </div>
+
+    <!-- Back Button -->
+    <div class="flex justify-start">
+        <a asp-action="Dashboard" asp-controller="Admin"
+           class="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmToggle(form) {
+            var btn = form.querySelector("button");
+            var action = btn.textContent.trim();
+            return confirm(`Are you sure you want to ${action.toLowerCase()} this user?`);
+        }
+
+        function confirmDelete(form) {
+            return confirm("Are you sure you want to delete this customer? This action cannot be undone.");
+        }
+    </script>
+}

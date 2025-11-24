@@ -78,6 +78,7 @@ namespace OnlineTicket.Controllers
             // Build dashboard view model
             var viewModel = new OrganizerDashboardViewModel
             {
+                OrganizerId = organizer.IdentityUserId,
                 OrganizerName = organizer.OrganizerName,
                 TotalEvents = events.Count,
                 TotalTicketsSoldAllTime = totalTicketsSoldAllTime,
@@ -886,6 +887,53 @@ namespace OnlineTicket.Controllers
                 );
         }
 
+        //Report Chart
+        public async Task<IActionResult> OrganizerSalesReport(string organizerId)
+        {
+            if (string.IsNullOrEmpty(organizerId))
+                return BadRequest("Organizer not specified.");
 
+            var organizer = await _context.Organizers
+                .Include(o => o.Events)
+                    .ThenInclude(e => e.TicketTypes)
+                        .ThenInclude(tt => tt.Tickets)
+                .FirstOrDefaultAsync(o => o.IdentityUserId == organizerId);
+
+            if (organizer == null)
+                return NotFound();
+
+            var report = new OrganizerSalesReportVM
+            {
+                OrganizerId = organizer.IdentityUserId,
+                OrganizerName = organizer.OrganizerName
+            };
+
+            foreach (var ev in organizer.Events)
+            {
+                var monthlySales = ev.TicketTypes
+                    .SelectMany(tt => tt.Tickets)
+                    .GroupBy(t => t.Booking.CreatedAt.Month)
+                    .Select(g => new MonthlySales
+                    {
+                        Month = new DateTime(1, g.Key, 1).ToString("MMM"),
+                        TicketsSold = g.Count()
+                    })
+                    .OrderBy(ms => DateTime.ParseExact(ms.Month, "MMM", null).Month)
+                    .ToList();
+
+                decimal totalRevenue = ev.TicketTypes
+                    .Select(tt => tt.Price * tt.Tickets.Count)
+                    .Sum();
+
+                report.EventSales.Add(new EventSalesData
+                {
+                    EventName = ev.Title,
+                    MonthlyTicketSales = monthlySales,
+                    TotalRevenue = totalRevenue
+                });
+            }
+
+            return View(report);
+        }
     }
 }

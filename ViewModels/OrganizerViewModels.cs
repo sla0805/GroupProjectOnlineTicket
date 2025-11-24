@@ -18,6 +18,7 @@ namespace OnlineTicket.ViewModels
 
     public class OrganizerDashboardViewModel
     {
+        public string OrganizerId { get; set; }
         public string OrganizerName { get; set; }
         public int TotalEvents { get; set; }
         public int TotalTicketsSoldAllTime { get; set; }
@@ -52,5 +53,24 @@ namespace OnlineTicket.ViewModels
         [StringLength(256)]
         [Display(Name = "Public Contact Email")]
         public string Email { get; set; }
+    }
+    public class OrganizerSalesReportVM
+    {
+        public string OrganizerId { get; set; }
+        public string OrganizerName { get; set; }
+        public List<EventSalesData> EventSales { get; set; } = new List<EventSalesData>();
+    }
+
+    public class EventSalesData
+    {
+        public string EventName { get; set; }
+        public List<MonthlySales> MonthlyTicketSales { get; set; } = new List<MonthlySales>();
+        public decimal TotalRevenue { get; set; }
+    }
+
+    public class MonthlySales
+    {
+        public string Month { get; set; } // e.g., "Jan", "Feb"
+        public int TicketsSold { get; set; }
     }
 }
