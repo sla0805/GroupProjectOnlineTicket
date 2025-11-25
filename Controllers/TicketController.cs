@@ -52,7 +52,6 @@ public class TicketController : Controller
                                .ToListAsync();
 
         if (!tickets.Any()) return NotFound();
-
         // Ensure each ticket has a QR code
         foreach (var ticket in tickets)
         {
@@ -61,8 +60,6 @@ public class TicketController : Controller
                 ticket.QrBase64 = QrHelper.GenerateQrBase64($"TicketID:{ticket.TicketId}");
             }
         }
-
-
         var document = new TicketDocument(tickets);
         var pdfBytes = document.GeneratePdf();
 
@@ -71,3 +68,6 @@ public class TicketController : Controller
 
    
 }
+
+
+

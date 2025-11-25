@@ -34,7 +34,7 @@ public class PaymentController : Controller
         var payment = new PaymentVM
         {
             BookingId = booking.BookingId,
-            Amount = booking.TotalAmount
+            Amount = booking.FinalAmount
         };
 
 
@@ -49,12 +49,10 @@ public class PaymentController : Controller
                                   .FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
         if (booking == null) return NotFound();
         decimal finalAmount = booking.TotalAmount;
-        if (!string.IsNullOrEmpty(payment.PromotionCode))
-        {
-            // Example: 10% discount if any promo code
-            finalAmount *= 0.9m;
-        }
-
+        //if (!string.IsNullOrEmpty(payment.PromotionCode))
+        //{         
+        //    finalAmount *= 0.9m;
+        //}
         var pay = new Payment
         {
             BookingId = booking.BookingId,
@@ -63,12 +61,8 @@ public class PaymentController : Controller
            
             PaymentStatus = "Paid",
             PaymentDate = DateTime.UtcNow,
-
-
         };
-
         _db.Payments.Add(pay);
-
         // Update booking status
         booking.BookingStatus = "Confirmed";
         booking.Payment = pay;

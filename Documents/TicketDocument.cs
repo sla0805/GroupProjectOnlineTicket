@@ -8,14 +8,11 @@ using System;
 public class TicketDocument : IDocument
 {
     public List<Ticket> Tickets { get; set; }
-
     public TicketDocument(List<Ticket> tickets)
     {
         Tickets = tickets;
     }
-
     public DocumentMetadata GetMetadata() => DocumentMetadata.Default;
-
     public void Compose(IDocumentContainer container)
     {
         container.Page(page =>
@@ -50,7 +47,6 @@ public class TicketDocument : IDocument
                                   col.Item().Text($"Venue: {ticket.Event?.Venue?.Name ?? "N/A"}");
                                   col.Item().Text($"Ticket ID: {ticket.TicketId}");
                               });
-
                               // Right: QR Code
                               row.RelativeItem(1).Column(col =>
                               {
@@ -77,3 +73,10 @@ public class TicketDocument : IDocument
         });
     }
 }
+
+
+
+
+
+
+

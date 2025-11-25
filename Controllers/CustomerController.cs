@@ -124,22 +124,22 @@ namespace OnlineTicket.Controllers
         }
 
 
-        //Search Events
-        public IActionResult BrowseEvents(string search = "")
-        {
-            var events = _db.Events
-                .Include(e => e.TicketTypes)
-                .Include(e => e.Organizer)
-                .Include(e => e.Venue)
-                .AsQueryable();
+        ////Search Events
+        //public IActionResult BrowseEvents(string search = "")
+        //{
+        //    var events = _db.Events
+        //        .Include(e => e.TicketTypes)
+        //        .Include(e => e.Organizer)
+        //        .Include(e => e.Venue)
+        //        .AsQueryable();
 
-            if (!string.IsNullOrEmpty(search))
-            {
-                events = events.Where(e => e.Title.Contains(search) || e.Venue.Name.Contains(search));
-            }
+        //    if (!string.IsNullOrEmpty(search))
+        //    {
+        //        events = events.Where(e => e.Title.Contains(search) || e.Venue.Name.Contains(search));
+        //    }
 
-            return View(events.ToList());
-        }
+        //    return View(events.ToList());
+        //}
 
       
     

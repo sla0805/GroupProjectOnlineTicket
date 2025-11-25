@@ -27,7 +27,10 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
                             <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Final Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PaymentStatus</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -41,21 +44,60 @@
                                     <span class="px-2 py-1 bg-gray-100 text-gray-800 text-sm rounded-full border">@b.Quantity</span>
                                 </td>
                                 <td class="px-6 py-4 font-bold text-gray-800">@b.TotalAmount.ToString("C")</td>
+                                <td class="px-6 py-4 font-bold text-gray-800">
+                                    @if (b.DiscountAmount > 0 && b.Promotion != null)
+                                    {
+                                        @b.DiscountAmount.ToString("C")
+                                        <span class="text-sm text-green-600">(@b.Promotion.DiscountPercentage% off)</span>
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                                <td class="px-6 py-4 font-bold text-gray-800">
+                                    @(b.BookingStatus == "Cancelled" ? "-" : b.FinalAmount.ToString("C"))
+                                </td>
+                                <!-- Payment Status Column -->
                                 <td class="px-6 py-4">
                                     @switch (b.BookingStatus)
                                     {
                                         case "Pending":
-                                            <span class="px-2 py-1 bg-yellow-200 text-yellow-800 text-sm rounded-full">Pending</span>
+                                            <span class="px-2 py-1 bg-yellow-200 text-yellow-800 text-sm rounded-full font-semibold">-</span>
                                             break;
                                         case "Paid":
                                         case "Confirmed":
-                                            <span class="px-2 py-1 bg-green-200 text-green-800 text-sm rounded-full">Confirmed</span>
+                                            <span class="px-2 py-1 bg-green-200 text-green-800 text-sm rounded-full font-semibold">Paid</span>
+                                            break;
+                                        case "Cancelled":
+                                            <span class="px-2 py-1 bg-gray-200 text-gray-800 text-sm rounded-full font-semibold">-</span>
                                             break;
                                         default:
-                                            <span class="px-2 py-1 bg-gray-200 text-gray-800 text-sm rounded-full">@b.BookingStatus</span>
+                                            <span class="px-2 py-1 bg-gray-200 text-gray-800 text-sm rounded-full font-semibold">@b.BookingStatus</span>
                                             break;
                                     }
                                 </td>
+
+                                <!-- Booking Status Column -->
+                                <td class="px-6 py-4">
+                                    @switch (b.BookingStatus)
+                                    {
+                                        case "Pending":
+                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-sm rounded-full font-semibold">Pending</span>
+                                            break;
+                                        case "Confirmed":
+                                            <span class="px-2 py-1 bg-green-100 text-green-800 text-sm rounded-full font-semibold">Confirmed</span>
+                                            break;
+                                        case "Cancelled":
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-sm rounded-full font-semibold">Cancelled</span>
+                                            break;
+                                        default:
+                                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-sm rounded-full font-semibold">@b.BookingStatus</span>
+                                            break;
+                                    }
+                                </td>
+
+                                <!-- Actions Column -->
                                 <td class="px-6 py-4 text-right space-x-2">
                                     @if (b.BookingStatus == "Pending")
                                     {
@@ -63,24 +105,36 @@
                                            class="inline-flex items-center px-3 py-1.5 bg-green-600 text-white text-sm font-semibold rounded-full hover:bg-green-700 transition">
                                             <i class="bi bi-credit-card mr-1"></i> Pay Now
                                         </a>
+
+                                        <form asp-action="Cancel" method="post" class="inline">
+                                            <input type="hidden" name="bookingId" value="@b.BookingId" />
+                                            <button type="submit"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white text-sm font-semibold rounded-full hover:bg-red-700 transition"
+                                                    onclick="return confirm('Are you sure you want to cancel this booking?');">
+                                                <i class="bi bi-x-circle mr-1"></i> Cancel
+                                            </button>
+                                        </form>
+       
                                     }
-                                    else
+                                    else if (b.BookingStatus == "Paid" || b.BookingStatus == "Confirmed")
                                     {
-                                        <span class="text-green-600 text-sm font-bold inline-flex items-center">
-                                            <i class="bi bi-check-circle-fill mr-1"></i> Paid
-                                        </span>
+                                        <a asp-controller="Ticket" asp-action="MyTickets" asp-route-bookingId="@b.BookingId"
+                                           class="inline-flex items-center px-3 py-1.5 border border-blue-600 text-blue-600 text-sm font-semibold rounded-full hover:bg-blue-50 transition">
+                                            <i class="bi bi-ticket-perforated mr-1"></i> View Tickets
+                                        </a>
+
+                                        <a asp-action="Details" asp-route-id="@b.BookingId"
+                                           class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-sm font-semibold rounded-full hover:bg-blue-600 transition">
+                                            View
+                                        </a>
                                     }
-
-                                    <a asp-controller="Ticket" asp-action="MyTickets" asp-route-bookingId="@b.BookingId"
-                                       class="inline-flex items-center px-3 py-1.5 border border-blue-600 text-blue-600 text-sm font-semibold rounded-full hover:bg-blue-50 transition">
-                                        <i class="bi bi-ticket-perforated mr-1"></i> View Tickets
-                                    </a>
-
-                                    <a asp-action="Details" asp-route-id="@b.BookingId"
-                                       class="inline-flex items-center px-3 py-1.5 bg-blue-500 text-white text-sm font-semibold rounded-full hover:bg-blue-600 transition">
-                                        View
-                                    </a>
+                                    else if (b.BookingStatus == "Cancelled")
+                                    {
+                                        <span class="text-gray-400 font-bold">-</span>
+                                    }
                                 </td>
+
+
                             </tr>
                         }
                     </tbody>

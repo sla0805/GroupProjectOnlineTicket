@@ -1,4 +1,11 @@
-﻿using QRCoder;
+﻿
+
+
+
+
+
+
+using QRCoder;
 using System;
 using static QRCoder.QRCodeGenerator;
 
