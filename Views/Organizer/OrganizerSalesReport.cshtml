@@ -5,19 +5,15 @@
 
 <div class="max-w-7xl mx-auto p-6">
 
-    <!-- Heading Section -->
+    <!-- Header Section -->
     <div class="bg-white shadow-md rounded-xl p-6 mb-8 border-l-4 border-indigo-600">
         <h1 class="text-3xl font-bold text-indigo-700 mb-2 flex items-center">
             <i class="fa-solid fa-chart-line mr-3"></i>
             Sales Report for @Model.OrganizerName
         </h1>
-
         <p class="text-gray-600 text-lg">
-            View a detailed breakdown of ticket sales, monthly performance trends, and
-            total revenue generated per event.
+            View monthly ticket sales per ticket type and total revenue breakdown.
         </p>
-
-        <!-- Back Link -->
         <a asp-action="Dashboard"
            asp-route-organizerId="@Model.OrganizerId"
            class="inline-block mt-4 text-indigo-600 hover:text-indigo-800 font-medium">
@@ -25,50 +21,74 @@
         </a>
     </div>
 
-    <!-- Event-wise Sales Charts -->
-    @foreach (var ev in Model.EventSales)
-    {
-        <div class="bg-white p-6 rounded-xl shadow mb-10">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-3 flex items-center">
-                <i class="fa-solid fa-ticket mr-2 text-indigo-600"></i> @ev.EventName
-            </h2>
+    <!-- Event Sales Charts Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @foreach (var ev in Model.EventSales)
+        {
+            var safeId = "chart_" + Guid.NewGuid().ToString("N");
 
-            <p class="text-gray-700 mb-4 font-medium">
-                Total Revenue:
-                <span class="text-green-600 font-bold">@ev.TotalRevenue.ToString("C")</span>
-            </p>
+            <div class="bg-white p-6 rounded-xl shadow">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-3 flex items-center">
+                    <i class="fa-solid fa-ticket mr-2 text-indigo-600"></i> @ev.EventName
+                </h2>
 
-            <!-- Chart -->
-            <canvas id="chart-@ev.EventName.Replace(" ", "")" class="h-64 w-full"></canvas>
+                <p class="text-gray-700 mb-4 font-medium">
+                    Total Revenue:
+                    <span class="text-green-600 font-bold">@ev.TotalRevenue.ToString("C")</span>
+                </p>
 
-            <script>
-                var ctx = document.getElementById('chart-@ev.EventName.Replace(" ", "")').getContext('2d');
+                <canvas id="@safeId" class="h-52 w-full"></canvas>
 
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: [@string.Join(", ", ev.MonthlyTicketSales.Select(ms => $"'{ms.Month}'"))],
-                        datasets: [{
-                            label: 'Tickets Sold',
-                            data: [@string.Join(", ", ev.MonthlyTicketSales.Select(ms => ms.TicketsSold))],
-                            backgroundColor: 'rgba(99, 102, 241, 0.7)',
-                            borderColor: 'rgba(99, 102, 241, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { display: true }
-                        },
-                        scales: {
-                            y: { beginAtZero: true }
-                        }
-                    }
-                });
-            </script>
-        </div>
-    }
+                @{
+                    // Collect all months across ticket types
+                    var months = ev.TicketTypeSales
+                    .SelectMany(tt => tt.MonthlySales)
+                    .Select(ms => ms.Month)
+                    .Distinct()
+                    .ToList();
+
+                    // Build dataset array for Chart.js
+                    var datasets = ev.TicketTypeSales.Select(tt => new
+                    {
+                        label = tt.TicketTypeName,
+                        data = months.Select(m => tt.MonthlySales.FirstOrDefault(x => x.Month == m)?.TicketsSold ?? 0).ToArray(),
+                        backgroundColor = tt.Color,
+                        borderColor = tt.Color,
+                        borderWidth = 1
+                    }).ToArray();
+
+                    // Serialize to JSON
+                    var monthsJson = System.Text.Json.JsonSerializer.Serialize(months);
+                    var datasetsJson = System.Text.Json.JsonSerializer.Serialize(datasets);
+                }
+
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const ctx = document.getElementById("@safeId");
+                        if (!ctx) return;
+
+                        const chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: @Html.Raw(monthsJson),
+                                datasets: @Html.Raw(datasetsJson)
+                                                },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: { display: true }
+                                },
+                                scales: {
+                                    y: { beginAtZero: true }
+                                }
+                            }
+                        });
+                    });
+                </script>
+            </div>
+        }
+    </div>
+
 </div>
 
 @section Scripts {

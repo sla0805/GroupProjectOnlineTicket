@@ -21,6 +21,7 @@ namespace OnlineTicket.Models
 
       
         [Required]
+        [MaxLength(50)]
         public string PaymentStatus { get; set; } = "Pending";
 
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow;

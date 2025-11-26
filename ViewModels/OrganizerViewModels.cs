@@ -64,9 +64,18 @@ namespace OnlineTicket.ViewModels
     public class EventSalesData
     {
         public string EventName { get; set; }
-        public List<MonthlySales> MonthlyTicketSales { get; set; } = new List<MonthlySales>();
         public decimal TotalRevenue { get; set; }
+        public List<MonthlySales> MonthlyTicketSales { get; set; } = new();
+        public List<TicketTypeSalesVM> TicketTypeSales { get; set; } = new();
     }
+
+    public class TicketTypeSalesVM
+    {
+        public string TicketTypeName { get; set; }
+        public string Color { get; set; } = "#6366F1"; // default indigo
+        public List<MonthlySales> MonthlySales { get; set; } = new();
+    }
+
 
     public class MonthlySales
     {

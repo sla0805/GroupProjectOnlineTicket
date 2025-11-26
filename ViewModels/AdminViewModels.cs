@@ -19,6 +19,8 @@ namespace OnlineTicket.ViewModels
 
         // Revenue per month
         public List<RevenuePerMonthVM> RevenuePerMonth { get; set; }
+        public List<RevenuePerMonthByOrganizerVM> RevenuePerMonthByOrganizer { get; set; }
+
     }
 
     public class TicketsPerEventVM
@@ -37,6 +39,15 @@ namespace OnlineTicket.ViewModels
 
     public class RevenuePerMonthVM
     {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public decimal Revenue { get; set; }
+    }
+
+    public class RevenuePerMonthByOrganizerVM
+    {
+        public int OrganizerId { get; set; }
+        public string OrganizerName { get; set; }
         public int Year { get; set; }
         public int Month { get; set; }
         public decimal Revenue { get; set; }

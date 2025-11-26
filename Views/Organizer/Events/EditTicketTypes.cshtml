@@ -3,63 +3,68 @@
     ViewData["Title"] = "Edit Ticket Types";
 }
 
-<div class="max-w-5xl mx-auto p-6">
-    <h1 class="text-2xl font-bold mb-6 text-indigo-600">Ticket Types for "@Model.Title"</h1>
+<div class="max-w-6xl mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-indigo-600">Ticket Types for "@Model.Title"</h1>
 
+    <!-- Success / Error Messages -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="bg-green-100 text-green-800 p-3 rounded mb-4 flex justify-between items-center">
+        <div class="bg-green-100 text-green-800 p-3 rounded mb-4 flex justify-between items-center shadow-sm">
             <span>@TempData["SuccessMessage"]</span>
-            <button type="button" class="ml-4 font-bold" onclick="this.parentElement.style.display='none'">×</button>
+            <button type="button" class="ml-4 font-bold hover:text-green-900" onclick="this.parentElement.style.display='none'">×</button>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="bg-red-100 text-red-800 p-3 rounded mb-4 flex justify-between items-center">
+        <div class="bg-red-100 text-red-800 p-3 rounded mb-4 flex justify-between items-center shadow-sm">
             <span>@TempData["ErrorMessage"]</span>
-            <button type="button" class="ml-4 font-bold" onclick="this.parentElement.style.display='none'">×</button>
+            <button type="button" class="ml-4 font-bold hover:text-red-900" onclick="this.parentElement.style.display='none'">×</button>
         </div>
     }
 
+    <!-- Ticket Types Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @foreach (var tt in Model.TicketTypes)
         {
-            <div class="bg-white p-4 rounded shadow flex flex-col justify-between">
-                <div>
-                    <h2 class="font-semibold text-lg">@tt.Name</h2>
-                    <p class="text-gray-600 mt-1">Price: @tt.Price.ToString("C")</p>
-                    <p class="text-gray-600 mt-1">Total Seats: @tt.TotalSeats</p>
-                    <p class="text-gray-600 mt-1">Sold: @(tt.Tickets?.Count ?? 0)</p>
+            <div class="bg-white p-5 rounded-xl shadow-md flex flex-col justify-between hover:shadow-lg transition-shadow duration-300">
+                <!-- Ticket Info -->
+                <div class="mb-4">
+                    <h2 class="font-semibold text-xl text-gray-800">@tt.Name</h2>
+                    <p class="text-gray-500 mt-1">Price: @tt.Price.ToString("C")</p>
+                    <p class="text-gray-500 mt-1">Total Seats: @tt.TotalSeats</p>
+                    <p class="text-gray-500 mt-1">Sold: @(tt.Tickets?.Count ?? 0)</p>
                 </div>
 
-                <div class="flex justify-between mt-4">
-                    <!-- Edit Form -->
-                    <form asp-action="UpdateTicketType" method="post" class="space-y-2">
+                <!-- Forms -->
+                <div class="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0 mt-4">
+                    <!-- Update Form -->
+                    <form asp-action="UpdateTicketType" method="post" class="flex-1 space-y-2 bg-gray-50 p-3 rounded shadow-inner">
                         <input type="hidden" name="ticketTypeId" value="@tt.TicketTypeId" />
-                        <div>
-                            <input name="name" value="@tt.Name" class="border px-2 py-1 w-full rounded" />
-                        </div>
-                        <div>
-                            <input name="price" type="number" step="0.01" value="@tt.Price" class="border px-2 py-1 w-full rounded" />
-                        </div>
-                        <div>
-                            <input name="totalSeats" type="number" value="@tt.TotalSeats" min="0" class="border px-2 py-1 w-full rounded" />
-                        </div>
-                        <button type="submit" class="mt-2 px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 w-full">Update</button>
+                        <input name="name" value="@tt.Name" class="border px-2 py-1 w-full rounded focus:ring focus:ring-indigo-300" placeholder="Name" />
+                        <input name="price" type="number" step="0.01" value="@tt.Price" class="border px-2 py-1 w-full rounded focus:ring focus:ring-indigo-300" placeholder="Price" />
+                        <input name="totalSeats" type="number" value="@tt.TotalSeats" min="0" class="border px-2 py-1 w-full rounded focus:ring focus:ring-indigo-300" placeholder="Total Seats" />
+                        <button type="submit" class="w-full mt-2 flex justify-center items-center gap-2 bg-yellow-400 text-white rounded-lg py-2 hover:bg-yellow-500 transition-colors">
+                            <i class="fa-solid fa-pen-to-square"></i> Update
+                        </button>
                     </form>
 
                     <!-- Delete Form -->
-                    <form asp-action="DeleteTicketType" method="post" onsubmit="return confirm('Are you sure you want to delete this ticket type?');">
+                    <form asp-action="DeleteTicketType" method="post" onsubmit="return confirm('Are you sure you want to delete this ticket type?');" class="flex-1">
                         <input type="hidden" name="ticketTypeId" value="@tt.TicketTypeId" />
-                        <button type="submit" class="mt-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 w-full">Delete</button>
+                        <button type="submit" class="w-full flex justify-center items-center gap-2 py-2 mt-2 sm:mt-0 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
                     </form>
                 </div>
             </div>
         }
     </div>
 
-    <div class="mt-6">
-        <a asp-action="AddTicketTypes" asp-route-eventId="@Model.EventId" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Add New Ticket Type</a>
-        <a asp-action="Events" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">Event Lists</a>
+    <!-- Bottom Buttons -->
+    <div class="mt-6"> 
+        <a asp-action="AddTicketTypes" asp-route-eventId="@Model.EventId" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Add New Ticket Type</a> 
+        <a asp-action="Events" class="px-4 py-2 border border-indigo-300 rounded text-gray-700 hover:bg-gray-100">
+            Event Lists
+        </a>
     </div>
 </div>

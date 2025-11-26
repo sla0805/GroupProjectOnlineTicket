@@ -56,17 +56,18 @@ namespace OnlineTicket.Controllers
                 .ToListAsync();
 
             // -----------------------------
-            // Total revenue per month
+            // Total revenue per month per organizer
             // -----------------------------
-            var revenuePerMonth = await _context.Bookings
-                .GroupBy(b => new { b.CreatedAt.Year, b.CreatedAt.Month })
-                .Select(g => new RevenuePerMonthVM
+            var revenuePerMonthByOrganizer = await _context.Bookings
+                .Include(b => b.Event)
+                    .ThenInclude(e => e.Organizer)
+                .GroupBy(b => new { b.Event.Organizer.OrganizerName, b.CreatedAt.Month })
+                .Select(g => new RevenuePerMonthByOrganizerVM
                 {
-                    Year = g.Key.Year,
+                    OrganizerName = g.Key.OrganizerName,
                     Month = g.Key.Month,
                     Revenue = g.Sum(b => b.TotalAmount)
                 })
-                .OrderBy(r => r.Year).ThenBy(r => r.Month)
                 .ToListAsync();
 
             // -----------------------------
@@ -79,11 +80,124 @@ namespace OnlineTicket.Controllers
             {
                 TicketsPerEvent = ticketsPerEvent,
                 RevenuePerEvent = revenuePerEvent,
-                RevenuePerMonth = revenuePerMonth,
+                RevenuePerMonthByOrganizer = revenuePerMonthByOrganizer,
                 ActiveUsersCount = activeUsersCount
             };
 
             return View(dashboardVM);
+        }
+
+        //Charts
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Charts()
+        {            
+            var revenuePerMonthByOrganizer = await _context.Bookings
+                .Include(b => b.Event)
+                    .ThenInclude(e => e.Organizer)
+                .GroupBy(b => new { b.Event.Organizer.OrganizerName, b.CreatedAt.Month })
+                .Select(g => new RevenuePerMonthByOrganizerVM
+                {
+                    OrganizerName = g.Key.OrganizerName,
+                    Month = g.Key.Month,
+                    Revenue = g.Sum(b => b.TotalAmount)
+                })
+                .ToListAsync();
+
+            var dashboardVM = new AdminDashboardVM
+            {
+                RevenuePerMonthByOrganizer = revenuePerMonthByOrganizer
+            };
+
+            return View(dashboardVM);
+        }
+
+        //AdminAnalytics
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminAnalytics()
+        {
+            // -----------------------------
+            // Total tickets sold per event
+            // -----------------------------
+            var ticketsPerEvent = await _context.Tickets
+                .GroupBy(t => new { t.EventId, t.Event.Title })
+                .Select(g => new TicketsPerEventVM
+                {
+                    EventId = g.Key.EventId,
+                    Title = g.Key.Title,
+                    TotalTicketsSold = g.Count()
+                })
+                .ToListAsync();
+
+            // -----------------------------
+            // Total revenue per event
+            // -----------------------------
+            var revenuePerEvent = await _context.Bookings
+                .GroupBy(b => new { b.EventId, b.Event.Title })
+                .Select(g => new RevenuePerEventVM
+                {
+                    EventId = g.Key.EventId,
+                    Title = g.Key.Title,
+                    TotalRevenue = g.Sum(b => b.TotalAmount)
+                })
+                .ToListAsync();
+
+            // Build dashboard view model
+            var dashboardVM = new AdminDashboardVM
+            {
+                TicketsPerEvent = ticketsPerEvent,
+                RevenuePerEvent = revenuePerEvent
+                
+            };
+
+            return View(dashboardVM);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Bookings(string searchString, int page = 1, int pageSize = 10)
+        {
+            var query = _context.Bookings
+                .Include(b => b.Customer)
+                .Include(b => b.Event)
+                .Include(b => b.Promotion)
+                .AsQueryable();
+
+            // Search
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(b =>
+                    b.BookingId.ToString().Contains(searchString) ||
+                    b.Customer.FullName.Contains(searchString) ||
+                    b.Event.Title.Contains(searchString) ||
+                    (b.Promotion != null && b.Promotion.Code.Contains(searchString))
+                );
+            }
+
+            // Total count for pagination
+            var totalCount = await query.CountAsync();
+
+            // Pagination
+            var bookings = await query
+                .OrderByDescending(b => b.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(b => new BookingListVM
+                {
+                    BookingId = b.BookingId,
+                    CustomerName = b.Customer.FullName,
+                    EventName = b.Event.Title,
+                    Quantity = b.Quantity,
+                    CreatedAt = b.CreatedAt,
+                    PromotionCode = b.Promotion != null ? b.Promotion.Code : "-",
+                    FinalAmount = b.FinalAmount
+                })
+                .ToListAsync();
+
+            // Pass data + pagination info to view
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            ViewBag.SearchString = searchString;
+
+            return View(bookings);
         }
 
 

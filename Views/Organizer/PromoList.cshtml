@@ -1,5 +1,4 @@
-﻿@using System.Linq
-@model IEnumerable<OnlineTicket.ViewModels.PromotionViewModel>
+﻿@model IEnumerable<OnlineTicket.ViewModels.PromotionViewModel>
 
 <div class="max-w-6xl mx-auto mt-10 px-4">
 
@@ -22,8 +21,10 @@
     <!-- Header Section -->
     <div class="mb-8 p-6 rounded-2xl bg-gradient-to-r from-indigo-500 to-indigo-400 text-white shadow-xl hover:shadow-2xl transition duration-500 flex flex-col md:flex-row md:justify-between md:items-start gap-4">
         <div class="text-center md:text-left">
-            <h1 class="text-4xl md:text-5xl font-extrabold drop-shadow-lg mb-2">Manage Promotions</h1>
-            <p class="text-lg md:text-xl font-medium drop-shadow-sm">View, add, edit, or delete promotional codes for your events and ticket types.</p>
+            <h1 class="text-4xl md:text-5xl font-extrabold drop-shadow-lg mb-2">Your Promotions</h1>
+            <p class="text-lg md:text-xl font-medium drop-shadow-sm">
+                These are the promotional codes associated with your events. You can add, edit, or delete them here.
+            </p>
         </div>
         <div class="flex gap-3 justify-center md:justify-start mt-4">
             <a asp-action="AddPromotion"
@@ -31,7 +32,6 @@
                 <i class="fa-solid fa-plus mr-2"></i> Add Promotion
             </a>
         </div>
-
     </div>
 
     <!-- Promotions Table -->
@@ -85,17 +85,14 @@
 
         @if (!Model.Any())
         {
-            <p class="text-gray-500 text-center mt-4 italic">No promotions available. Click "Add Promotion" to create one.</p>
+            <p class="text-gray-500 text-center mt-4 italic">You don’t have any promotions yet. Click "Add Promotion" to create one.</p>
         }
     </div>
+
     <div class="mt-8 text-center">
         <a asp-action="Dashboard" asp-controller="Organizer"
            class="inline-flex items-center px-6 py-3 bg-gray-700 rounded-lg shadow hover:bg-gray-800 hover:scale-105 transition transform text-white font-semibold">
             <i class="fa-solid fa-arrow-left mr-2"></i> Back to Dashboard
         </a>
     </div>
-<<<<<<< HEAD
 </div>
-=======
-</div>
->>>>>>> 666f25bdef29f7288b1e41606462a3040614ad15

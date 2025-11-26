@@ -45,25 +45,25 @@ namespace OnlineTicket.Controllers
 
             var organizer = await _context.Organizers.FindAsync(organizerId.Value);
 
-            // Fetch all events for this organizer
+            // Fetch all events with tickets loaded
             var events = await _context.Events
                 .Where(e => e.OrganizerId == organizerId.Value)
-                .Include(e => e.Bookings)
-                    .ThenInclude(b => b.Tickets)
+                .Include(e => e.TicketTypes)
+                    .ThenInclude(tt => tt.Tickets)
                 .ToListAsync();
 
-            // Calculate event stats
+            // Calculate event stats directly from tickets
             var eventStats = events.Select(e => new EventStatsViewModel
             {
                 EventId = e.EventId,
                 Title = e.Title,
                 EventDate = e.EventDate,
-                TotalTicketsSold = e.Bookings.Sum(b => b.Tickets.Count),
-                TotalRevenue = e.Bookings.Sum(b => b.Payment?.Amount?? 0),
-                TotalSeatsAvailable = e.TotalSeats - e.Bookings.Sum(b => b.Tickets.Count)
+                TotalTicketsSold = e.TicketTypes.SelectMany(tt => tt.Tickets).Count(),
+                TotalRevenue = e.TicketTypes.Sum(tt => tt.Price * tt.Tickets.Count),
+                TotalSeatsAvailable = e.TotalSeats - e.TicketTypes.SelectMany(tt => tt.Tickets).Count()
             }).ToList();
 
-            // Calculate Active Promotions count
+            // Active promotions
             var activePromotionsCount = await _context.Promotions
                 .Include(p => p.Event)
                 .Where(p => p.Event.OrganizerId == organizerId.Value
@@ -236,9 +236,6 @@ namespace OnlineTicket.Controllers
         // Views location: Views/Organizer/Events/{Index,Create,Edit,Delete,TicketTypes}.cshtml
         // -------------------------------
 
-        /* LIST: /Organizer/Events
-           Supports: search, category filter, venue filter, status, pagination
-        */
         public async Task<IActionResult> Events(string search, int? categoryId, int? venueId, string status, int page = 1, int pageSize = 10)
         {
             var organizerId = await GetCurrentOrganizerIdAsync();
@@ -706,27 +703,20 @@ namespace OnlineTicket.Controllers
             return RedirectToAction(nameof(AddTicketTypes), new { eventId = tt.EventId });
         }
 
-        // GET: /Organizer/Promotions
-        public async Task<IActionResult> Promotions(int eventId = 0)
+        // GET: /Organizer/Promotions 
+        public async Task<IActionResult> Promotions()
         {
-            // Fetch promotions with Event and TicketType
-            var query = _context.Promotions
+            // Get the current organizer's ID
+            var organizerId = await GetCurrentOrganizerIdAsync();
+
+            // Fetch promotions where the event belongs to this organizer
+            var promotions = await _context.Promotions
                 .Include(p => p.Event)
                 .Include(p => p.TicketType)
-                .AsQueryable();
+                .Where(p => p.Event.OrganizerId == organizerId)
+                .ToListAsync();
 
-            if (eventId > 0)
-                query = query.Where(p => p.EventId == eventId);
-
-            // Fetch events for dropdown filter
-            ViewBag.Events = new SelectList(
-                await _context.Events.ToListAsync(),
-                "EventId", "Title", eventId
-            );
-
-            var promotions = await query.ToListAsync();
-
-            // Map to PromotionViewModel
+            // Map to ViewModel
             var promoViewModels = promotions.Select(p => new PromotionViewModel
             {
                 PromotionId = p.PromotionId,
@@ -745,8 +735,6 @@ namespace OnlineTicket.Controllers
             return View("PromoList", promoViewModels);
         }
 
-
-
         // GET: /Organizer/AddPromotion
         [HttpGet]
         public async Task<IActionResult> AddPromotion()
@@ -762,7 +750,6 @@ namespace OnlineTicket.Controllers
 
             return View(vm);
         }
-
 
         // POST: /Organizer/AddPromotion
         [HttpPost]
@@ -823,8 +810,6 @@ namespace OnlineTicket.Controllers
 
             return View(vm);
         }
-
-
         // POST: /Organizer/EditPromotion
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -889,7 +874,7 @@ namespace OnlineTicket.Controllers
         }
 
 
-        //Report Chart
+        //Report Chart - Monthly Ticket Sales per Ticket Type
         public async Task<IActionResult> OrganizerSalesReport(string organizerId)
         {
             if (string.IsNullOrEmpty(organizerId))
@@ -899,6 +884,7 @@ namespace OnlineTicket.Controllers
                 .Include(o => o.Events)
                     .ThenInclude(e => e.TicketTypes)
                         .ThenInclude(tt => tt.Tickets)
+                            .ThenInclude(t => t.Booking)
                 .FirstOrDefaultAsync(o => o.IdentityUserId == organizerId);
 
             if (organizer == null)
@@ -912,30 +898,55 @@ namespace OnlineTicket.Controllers
 
             foreach (var ev in organizer.Events)
             {
-                var monthlySales = ev.TicketTypes
-                    .SelectMany(tt => tt.Tickets)
-                    .GroupBy(t => t.Booking.CreatedAt.Month)
-                    .Select(g => new MonthlySales
-                    {
-                        Month = new DateTime(1, g.Key, 1).ToString("MMM"),
-                        TicketsSold = g.Count()
-                    })
-                    .OrderBy(ms => DateTime.ParseExact(ms.Month, "MMM", null).Month)
-                    .ToList();
-
-                decimal totalRevenue = ev.TicketTypes
-                    .Select(tt => tt.Price * tt.Tickets.Count)
-                    .Sum();
-
-                report.EventSales.Add(new EventSalesData
+                var eventSalesData = new EventSalesData
                 {
                     EventName = ev.Title,
-                    MonthlyTicketSales = monthlySales,
-                    TotalRevenue = totalRevenue
-                });
+                    TotalRevenue = ev.TicketTypes.Sum(tt => tt.Price * tt.Tickets.Count),
+                    MonthlyTicketSales = new List<MonthlySales>(),
+                    TicketTypeSales = new List<TicketTypeSalesVM>()
+                };
+
+                // Get all months for the event across all tickets
+                var allMonths = ev.TicketTypes
+                    .SelectMany(tt => tt.Tickets)
+                    .Where(t => t.Booking != null)
+                    .Select(t => t.Booking.CreatedAt.Month)
+                    .Distinct()
+                    .OrderBy(m => m)
+                    .ToList();
+
+                // Populate TicketTypeSales
+                foreach (var tt in ev.TicketTypes)
+                {
+                    var ticketTypeSales = new TicketTypeSalesVM
+                    {
+                        TicketTypeName = tt.Name,
+                        Color = $"hsl({new Random().Next(0, 360)}, 70%, 50%)", // random color
+                        MonthlySales = new List<MonthlySales>()
+                    };
+
+                    foreach (var month in allMonths)
+                    {
+                        var ticketsSold = tt.Tickets
+                            .Where(t => t.Booking != null && t.Booking.CreatedAt.Month == month)
+                            .Count();
+
+                        ticketTypeSales.MonthlySales.Add(new MonthlySales
+                        {
+                            Month = new DateTime(1, month, 1).ToString("MMM"),
+                            TicketsSold = ticketsSold
+                        });
+                    }
+
+                    eventSalesData.TicketTypeSales.Add(ticketTypeSales);
+                }
+
+                report.EventSales.Add(eventSalesData);
             }
 
             return View(report);
         }
+
     }
+
 }

@@ -1,0 +1,84 @@
+﻿@model OnlineTicket.ViewModels.AdminDashboardVM
+@{
+    ViewData["Title"] = "Event Analytics";
+}
+
+<div class="max-w-7xl mx-auto p-6">
+
+    <!-- Page Heading -->
+    <div class="mb-8">
+        <h1 class="text-4xl font-extrabold text-indigo-600 mb-2">Data Analytics of Each Event</h1>
+        <p class="text-gray-600 text-lg">Analyze ticket sales and performance metrics for your events to make informed decisions.</p>
+    </div>
+
+    <!-- Back Button -->
+    <div class="flex justify-start mb-6">
+        <a asp-action="Dashboard" asp-controller="Admin"
+           class="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Tickets Sold Table -->
+    <div class="bg-white p-6 rounded-xl shadow mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-ticket text-indigo-600"></i> Tickets Sold Per Event
+        </h2>
+        @if (Model.TicketsPerEvent.Any())
+        {
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left">Event</th>
+                        <th class="px-6 py-3 text-right">Tickets Sold</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach (var item in Model.TicketsPerEvent)
+                    {
+                        <tr>
+                            <td class="px-6 py-4">@item.Title</td>
+                            <td class="px-6 py-4 text-right font-semibold">@item.TotalTicketsSold</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No ticket data available.</p>
+        }
+    </div>
+
+    <!-- Revenue Per Event Table -->
+    <div class="bg-white p-6 rounded-xl shadow mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-coins text-yellow-500"></i> Revenue Per Event
+        </h2>
+        @if (Model.RevenuePerEvent.Any())
+        {
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left">Event</th>
+                        <th class="px-6 py-3 text-right">Revenue</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach (var item in Model.RevenuePerEvent)
+                    {
+                        <tr>
+                            <td class="px-6 py-4">@item.Title</td>
+                            <td class="px-6 py-4 text-right font-semibold">@item.TotalRevenue.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p>No revenue data available.</p>
+        }
+    </div>
+
+</div>

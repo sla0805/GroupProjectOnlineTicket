@@ -1,0 +1,81 @@
+﻿@model List<OnlineTicket.ViewModels.BookingListVM>
+@{
+    ViewData["Title"] = "Manage Bookings";
+}
+
+<div class="max-w-7xl mx-auto p-6">
+
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-indigo-600 flex items-center gap-2 mb-2">
+            <i class="fa-solid fa-ticket"></i> Manage Bookings
+        </h1>
+        <p class="text-gray-600 text-lg mb-1">
+            View and manage all customer bookings for your events.
+        </p>
+        <p class="text-gray-500 text-sm">
+            Search by booking ID, customer name, event name, or promotion code.
+        </p>
+        <form method="get" class="flex items-center mt-4">
+            <input type="text" name="searchString" value="@ViewBag.SearchString"
+                   placeholder="Search bookings..."
+                   class="px-3 py-2 border rounded-l-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-r-lg hover:bg-indigo-700 transition">
+                Search
+            </button>
+        </form>
+    </div>
+
+    <!-- Booking Table -->
+    <div class="bg-white p-6 rounded-xl shadow mb-8">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event Name</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booked Date</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Promotion Code</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount Paid</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach (var booking in Model)
+                    {
+                        <tr class="hover:bg-indigo-50 transition">
+                            <td class="px-6 py-4 whitespace-nowrap">@booking.BookingId</td>
+                            <td class="px-6 py-4 whitespace-nowrap">@booking.CustomerName</td>
+                            <td class="px-6 py-4 whitespace-nowrap">@booking.EventName</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">@booking.Quantity</td>
+                            <td class="px-6 py-4 whitespace-nowrap">@booking.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="px-6 py-4 whitespace-nowrap">@booking.PromotionCode</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right font-semibold text-green-600">@booking.FinalAmount.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-center items-center space-x-2">
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                var activeClass = i == ViewBag.CurrentPage ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300";
+                <a href="@Url.Action("Bookings", new { page = i, searchString = ViewBag.SearchString })"
+                   class="px-3 py-1 rounded @activeClass transition">
+                    @i
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- Back Button with spacing -->
+    <div class="flex justify-start mt-6">
+        <a asp-action="Dashboard" asp-controller="Admin"
+           class="inline-flex items-center px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">
+            <i class="fa-solid fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
