@@ -1,138 +1,191 @@
 ﻿@model OnlineTicket.Models.BookingCreateVM
-
 @{
     ViewData["Title"] = "Book Event";
 }
 
-<link rel="stylesheet" href="~/css/booking.css" />
-<script src="~/js/booking.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="~/js/booking.js" defer></script>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-xl-10">
+<div class="max-w-5xl mx-auto px-4 py-10">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+       
+            <div class="lg:col-span-5 relative rounded-2xl overflow-hidden shadow-lg h-full">
+                <img src="@(ViewBag.EventImage ?? "https://via.placeholder.com/600x400?text=Event+Image")" alt="@ViewBag.Title"
+                     class="w-full h-full object-cover">
 
-            <div class="card modern-card">
-                <div class="row g-0">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent p-6 flex flex-col justify-end text-white">
+                <div class="flex items-center gap-2 text-white/80">
+                   
+                    <h3 class=" text-2xl font-bold mb-1">
+                        @ViewBag.EventTitle
+                    </h3>
+                </div>
 
-                    <div class="col-lg-5">
-                        <div class="event-image-container">
-                            <img src="@(ViewBag.EventImage ?? "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80&w=600")"
-                                 class="event-img-cover"
-                                 alt="@Model.EventTitle" />
+                 <div class="flex items-center gap-2 text-sm text-white/80">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-10H9v4h2V8zm0 6H9v2h2v-2z" clip-rule="evenodd" />
+                    </svg>
+                    @ViewBag.venueName
+                </div>
+                <div class="flex items-center gap-2 text-sm text-white/80 mt-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M6 2a1 1 0 00-1 1v1H3a2 2 0 00-2 2v10a1 1 0 001 1h14a1 1 0 001-1V6a2 2 0 00-2-2h-2V3a1 1 0 00-1-1H6z" />
+                    </svg>
+                    @ViewBag.eventDate.ToString("MMM dd, yyyy @ hh:mm tt")
+                </div>
 
-                            <div class="event-overlay">
-                                <span class="badge bg-primary mb-2 shadow-sm">Event Details</span>
-                                <h3 class="fw-bold mb-1">@Model.EventTitle</h3>
-                                <div class="d-flex align-items-center mt-2 text-white-50 small">
-                                    <i class="bi bi-geo-alt me-1"></i> @(ViewBag.VenueName)
+                <div class="flex items-center gap-2 text-sm text-white/80">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-10H9v4h2V8zm0 6H9v2h2v-2z" clip-rule="evenodd" />
+                    </svg>
+                    @ViewBag.Description
+                </div>
+                </div>
+            </div>
+
+
+        <!-- Booking Form -->
+        <div class="lg:col-span-7 bg-white rounded-2xl shadow-lg p-6 lg:p-10">
+            <div>
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-semibold text-slate-800">Book Your Tickets</h3>
+                    <span class="text-sm text-slate-500">Step 1 of 2</span>
+                </div>
+
+                <form asp-action="Create" method="post" id="bookingForm" class="space-y-6">
+                    <input type="hidden" asp-for="EventId" />
+                    <input type="hidden" asp-for="EventTitle" />
+
+                    <!-- Ticket Types -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-3">Select Ticket Class</label>
+                        <div class="grid grid-cols-1 gap-4">
+                            @foreach (var tt in Model.TicketTypes)
+                            {
+                                <div class="flex items-center border rounded-lg p-3 hover:shadow-md transition-shadow duration-200">
+                                    <input type="radio"
+                                           asp-for="TicketTypeId"
+                                           value="@tt.TicketTypeId"
+                                           id="ticket_@tt.TicketTypeId"
+                                           class="h-5 w-5 text-sky-600"
+                                           data-price="@tt.Price"
+                                           data-seats="@tt.TotalSeats" />
+                                    <label for="ticket_@tt.TicketTypeId" class="ml-3 flex-1 cursor-pointer">
+                                        <div class="flex items-center justify-between">
+                                            <div class="text-sm font-medium text-slate-800">@tt.Name</div>
+                                            <div class="text-sm font-semibold text-emerald-600">@tt.Price.ToString("C")</div>
+                                        </div>
+                                        <div class="text-xs text-slate-500 mt-1">
+                                            @if (tt.TotalSeats <= 0)
+                                            {
+                                                <span class="text-red-500 font-semibold">Sold out</span>
+                                            }
+                                            else if (tt.TotalSeats < 10)
+                                            {
+                                                <span class="text-orange-500 font-semibold">Only @tt.TotalSeats left</span>
+                                            }
+                                            else
+                                            {
+                                                <span>@tt.TotalSeats seats available</span>
+                                            }
+                                        </div>
+                                    </label>
                                 </div>
-                                <div class="d-flex align-items-center mt-1 text-white-50 small">
-                                    <i class="bi bi-calendar3 me-1"></i> @(((DateTime?)ViewBag.EventDate)?.ToString("MMM dd, yyyy • hh:mm tt"))
-                                </div>
-                            </div>
+                            }
                         </div>
+                        <span asp-validation-for="TicketTypeId" class="text-red-600 text-sm mt-1 block"></span>
                     </div>
 
-                    <div class="col-lg-7">
-                        <div class="card-body p-4 p-md-5">
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <h4 class="fw-bold text-dark mb-0">Book Your Tickets</h4>
-                                <div class="text-muted small">Step 1 of 2</div>
-                            </div>
+                    <!-- Quantity -->
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-600 mb-1">Quantity</label>
+                        <input asp-for="Quantity" id="qtyInput" type="number" min="1" value="1"
+                               class="w-24 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-sky-200 focus:outline-none" />
+                        <span asp-validation-for="Quantity" class="text-red-600 text-sm block mt-1"></span>
+                    </div>
 
-                            <form asp-action="Create" method="post">
-                                <input type="hidden" asp-for="EventId" />
-                                <input type="hidden" asp-for="EventTitle" />
-
-                                <div class="mb-4">
-                                    <label class="form-label text-muted small fw-bold text-uppercase mb-2 ps-1">
-                                        Select Ticket Class
-                                    </label>
-
-                                    <div class="ticket-selector-grid">
-                                        @foreach (var tt in Model.TicketTypes)
-                                        {
-                                            <div class="position-relative">
-                                                <input type="radio"
-                                                       asp-for="TicketTypeId"
-                                                       value="@tt.TicketTypeId"
-                                                       class="btn-check"
-                                                       id="ticket_@tt.TicketTypeId"
-                                                       required />
-
-                                                <label class="ticket-option-card" for="ticket_@tt.TicketTypeId">
-                                                    <i class="bi bi-check-circle-fill check-icon"></i>
-
-                                                    <div>
-                                                        <div class="ticket-name">@tt.Name</div>
-                                                        <div class="ticket-price">@tt.Price.ToString("C")</div>
-                                                    </div>
-
-                                                    <div class="ticket-info">
-                                                        @if (tt.TotalSeats < 10 && tt.TotalSeats > 0)
-                                                        {
-                                                            <span class="text-warning fw-bold">
-                                                                <i class="bi bi-exclamation-circle me-1"></i>
-                                                                Only @tt.TotalSeats left!
-                                                            </span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span>
-                                                                <i class="bi bi-people me-1"></i>
-                                                                @tt.TotalSeats seats available
-                                                            </span>
-                                                        }
-                                                    </div>
-                                                </label>
-                                            </div>
-                                        }
-                                    </div>
-                                    <span asp-validation-for="TicketTypeId" class="text-danger small"></span>
-                                </div>
-
-                                <div class="form-floating mb-4">
-                                    <input asp-for="Quantity" type="number" class="form-control" id="qtyInput" min="1" value="1" required />
-                                    <label for="qtyInput">Quantity</label>
-                                </div>
-
-                                @if (Model.AvailablePromotions != null && Model.AvailablePromotions.Any())
+                    <!-- Promotion -->
+                    @if (Model.AvailablePromotions != null && Model.AvailablePromotions.Any())
+                    {
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-600 mb-3">Promotion</label>
+                            <div class="grid grid-cols-1 gap-4">
+                                @foreach (var p in Model.AvailablePromotions)
                                 {
-                                    <div class="summary-box p-3 mb-4">
-                                        <div class="d-flex align-items-center mb-2 text-primary fw-bold">
-                                            <i class="bi bi-tags-fill me-2"></i> Have a promo code?
-                                        </div>
-                                        <div class="form-floating">
-                                            <select asp-for="PromotionId" class="form-select bg-white border-0" id="promoSelect">
-                                                <option value="">No Promotion applied</option>
-                                                @foreach (var p in Model.AvailablePromotions)
-                                                {
-                                                    <option value="@p.PromotionId">
-                                                        @p.Name (-@p.DiscountPercentage.ToString("0")%)
-                                                    </option>
-                                                }
-                                            </select>
-                                            <label for="promoSelect">Select Promotion</label>
-                                        </div>
+                                    <div class="flex items-center border rounded-lg p-3 hover:shadow-md transition-shadow duration-200">
+                                        <input type="radio"
+                                               asp-for="PromotionId"
+                                               value="@p.PromotionId"
+                                               id="promo_@p.PromotionId"
+                                               class="h-5 w-5 text-sky-600"
+                                               data-discount="@p.DiscountPercentage" />
+                                        <label for="promo_@p.PromotionId" class="ml-3 flex-1 cursor-pointer">
+                                            <div class="flex items-center justify-between">
+                                                <div class="text-sm font-medium text-slate-800">@p.Name</div>
+                                                <div class="text-sm font-semibold text-emerald-600">
+                                                    -@p.DiscountPercentage.ToString("0")%
+                                                </div>
+                                            </div>
+                                            <div class="text-xs text-slate-500 mt-1">
+                                                Apply this promo to your booking for a @p.DiscountPercentage% discount
+                                            </div>
+                                        </label>
                                     </div>
                                 }
-
-                                <hr class="my-4 text-muted opacity-25">
-
-                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                    <a asp-controller="Event" asp-action="Index" asp-route-id="@Model.EventId"
-                                       class="btn btn-light rounded-pill px-4 fw-bold">Cancel</a>
-
-                                    <button type="submit" class="btn btn-primary-modern px-5">
-                                        Confirm Booking <i class="bi bi-arrow-right ms-2"></i>
-                                    </button>
+                                <!-- Option for no promotion -->
+                                <div class="flex items-center border rounded-lg p-3 hover:shadow-md transition-shadow duration-200">
+                                    <input type="radio"
+                                           asp-for="PromotionId"
+                                           value=""
+                                           id="promo_none"
+                                           class="h-5 w-5 text-sky-600" checked />
+                                    <label for="promo_none" class="ml-3 flex-1 cursor-pointer">
+                                        <div class="text-sm font-medium text-slate-800">No promotion</div>
+                                    </label>
                                 </div>
-                            </form>
+                            </div>
+                            <span asp-validation-for="PromotionId" class="text-red-600 text-sm mt-1 block"></span>
+                        </div>
+                    }
 
+                    <hr class="border-t border-slate-200 my-2">
+
+                    <!-- Order Summary -->
+                    <div class="bg-slate-50 border rounded-lg p-4">
+                        <h4 class="text-sm font-semibold text-slate-700 mb-3">Order Summary</h4>
+                        <div class="flex justify-between text-sm text-slate-600 mb-1">
+                            <span>Ticket price</span>
+                            <span id="summaryPrice">—</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-slate-600 mb-1">
+                            <span>Quantity</span>
+                            <span id="summaryQty">1</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-slate-600 mb-1">
+                            <span>Subtotal</span>
+                            <span id="summarySubtotal">—</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-slate-600 mb-1">
+                            <span>Discount</span>
+                            <span id="summaryDiscount">—</span>
+                        </div>
+                        <div class="flex justify-between text-lg font-semibold text-slate-800 mt-3">
+                            <span>Total</span>
+                            <span id="summaryTotal">—</span>
                         </div>
                     </div>
 
-                </div>
+                    <!-- Actions -->
+                    <div class="flex justify-end items-center gap-3 mt-4">
+                        <a asp-controller="Event" asp-action="Index" asp-route-id="@Model.EventId"
+                           class="px-5 py-2 border rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition">
+                            Back
+                        </a>
+                        <button type="submit" class="bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 rounded-lg font-semibold text-sm transition">
+                            Confirm Booking
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

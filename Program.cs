@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OnlineTicket.Data;
+using QuestPDF;
+using QuestPDF.Infrastructure;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +19,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
 

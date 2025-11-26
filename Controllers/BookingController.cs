@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OnlineTicket.Data;
 using OnlineTicket.Models;
 using OnlineTicket.ViewModels;
+using System.Diagnostics.Tracing;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -54,6 +55,9 @@ public class BookingController : Controller
         ViewBag.EventImage = evt.ImagePath;
         ViewBag.EventDate = evt.EventDate;
         ViewBag.VenueName = evt.Venue.Name;
+        ViewBag.EventTitle = evt.Title;
+        ViewBag.Description = evt.Description;
+        ViewBag.EventOrganizer = evt.Organizer;
 
         return View(vm);
     }
@@ -69,21 +73,31 @@ public class BookingController : Controller
         var customer = await _db.Customers.FirstOrDefaultAsync(c => c.UserId == user.Id);
         if (customer == null) return RedirectToAction("Index", "Event");
 
-        var ticketType = await _db.TicketTypes.FindAsync(vm.TicketTypeId);
+        var ticketType = await _db.TicketTypes.FirstOrDefaultAsync(tt => tt.TicketTypeId == vm.TicketTypeId);
         if (ticketType == null || vm.Quantity > ticketType.TotalSeats)
         {
             ModelState.AddModelError("", "Invalid quantity or ticket type.");
             return View(vm);
         }
+        if (vm.Quantity <= 0 || vm.Quantity > ticketType.TotalSeats)
+        {
+            ModelState.AddModelError("", $"Quantity exceeds available seats ({ticketType.TotalSeats}).");
+            return View(vm);
+        }
 
         decimal totalAmount = ticketType.Price * vm.Quantity;
+        decimal discountAmount = 0m;
+        decimal finalAmount = totalAmount;
 
         // Apply promotion if selected
         if (vm.PromotionId.HasValue)
         {
             var promo = await _db.Promotions.FindAsync(vm.PromotionId.Value);
             if (promo != null)
-                totalAmount = totalAmount * (1 - (promo.DiscountPercentage / 100m));
+            {
+                discountAmount = Math.Round(totalAmount * (promo.DiscountPercentage / 100m), 2);
+                finalAmount = totalAmount - discountAmount;
+            }
         }
 
 
@@ -93,10 +107,16 @@ public class BookingController : Controller
             CustomerId = customer.CustomerId,
             Quantity = vm.Quantity,
             TotalAmount = totalAmount,
+            DiscountAmount = discountAmount,  
+            FinalAmount = finalAmount,
             BookingStatus = "Pending",
             PromotionId = vm.PromotionId,
             CreatedAt = DateTime.UtcNow
         };
+        // Reduce seat count
+        ticketType.TotalSeats -= vm.Quantity;
+        if (ticketType.TotalSeats < 0) ticketType.TotalSeats = 0; // defensive
+        _db.TicketTypes.Update(ticketType);
 
         _db.Bookings.Add(booking);
         await _db.SaveChangesAsync();
@@ -104,100 +124,49 @@ public class BookingController : Controller
         return RedirectToAction("Create", "Payment", new { bookingId = booking.BookingId });
     }
 
-    //    if (!ModelState.IsValid)
-    //    {
-    //        var evt = await _db.Events
-    //            .Include(e => e.TicketTypes)
-    //            .Include(e => e.Promotions)
-    //            .FirstOrDefaultAsync(e => e.EventId == vm.EventId);
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Cancel(int bookingId)
+    {
+        // Get current logged-in user
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return RedirectToAction("Index", "Event");
 
-    //        vm.TicketTypes = evt.TicketTypes.Select(tt => new TicketTypeDropdownItem
-    //        {
-    //            TicketTypeId = tt.TicketTypeId,
-    //            Name = tt.Name,
-    //            Price = tt.Price,
-    //            TotalSeats = tt.TotalSeats
-    //        }).ToList();
+        // Find booking for this user
+        var booking = await _db.Bookings
+            .Include(b => b.Customer)
+            .Include(b => b.Event)
+            .Include(b => b.Tickets)
+            .ThenInclude(b => b.TicketType)
+            .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.Customer.UserId == user.Id);
 
-    //        vm.AvailablePromotions = evt.Promotions.Select(p => new PromotionDropdownItem
-    //        {
-    //            PromotionId = p.PromotionId,
-    //            Name = p.Name,
-    //            DiscountPercentage = p.DiscountPercentage,
-    //            StartDate = p.StartDate,
-    //            EndDate = p.EndDate,
-    //            TicketTypeId = p.TicketTypeId
-    //        }).ToList();
+        if (booking == null) return NotFound();
 
-    //        return View(vm);
-    //    }
+        // Only allow cancelling if booking is still pending
+        if (booking.BookingStatus != "Pending")
+        {
+            TempData["Error"] = "Only pending bookings can be cancelled.";
+            return RedirectToAction("MyBookings");
+        }
+        
+        // Update status to Cancelled
+        booking.BookingStatus = "Cancelled";
 
-    //    var user = await _userManager.GetUserAsync(User);
-    //    var customer = await _db.Customers.FirstOrDefaultAsync(c => c.UserId == user.Id);
-    //    if (customer == null) return RedirectToAction("Index", "Event");
-
-    //    var ticketType = await _db.TicketTypes.FindAsync(vm.TicketTypeId);
-    //    if (ticketType == null)
-    //    {
-    //        ModelState.AddModelError("", "Invalid ticket type.");
-    //        return View(vm);
-    //    }
-
-    //    if (vm.Quantity <= 0 || vm.Quantity > ticketType.TotalSeats)
-    //    {
-    //        ModelState.AddModelError("", "Quantity exceeds available seats.");
-    //        return View(vm);
-    //    }
-
-    //    decimal subtotal = ticketType.Price * vm.Quantity;
-    //    decimal discountAmount = 0m;
-    //    Promotion appliedPromo = null;
-
-    //    if (vm.PromotionId.HasValue)
-    //    {
-    //        appliedPromo = await _db.Promotions.FindAsync(vm.PromotionId.Value);
-    //        var now = DateTime.UtcNow;
-
-    //        if (appliedPromo == null 
-    //            || appliedPromo.IsActive 
-    //            || appliedPromo.StartDate > now 
-    //            || appliedPromo.EndDate < now 
-    //            || appliedPromo.EventId != vm.EventId 
-    //            || appliedPromo.TicketTypeId != vm.TicketTypeId)
-    //        {
-    //            ModelState.AddModelError("", "Promotion is invalid or not applicable.");
-    //            return View(vm);
-    //        }
-
-    //        discountAmount = Math.Round(subtotal * (appliedPromo.DiscountPercentage / 100m), 2);
-    //        if (discountAmount > subtotal) discountAmount = subtotal;
-    //    }
-
-    //    decimal finalAmount = subtotal - discountAmount;
-
-    //    var booking = new Booking
-    //    {
-    //        EventId = vm.EventId,
-    //        CustomerId = customer.CustomerId,
-    //        Quantity = vm.Quantity,
-    //        TotalAmount = subtotal,
-    //        DiscountAmount = discountAmount,
-    //        FinalAmount = finalAmount,
-    //        BookingStatus = "Pending",
-    //        PromotionId = appliedPromo?.PromotionId,
-    //        CreatedAt = DateTime.UtcNow
-    //    };
-
-    //    _db.Bookings.Add(booking);
-
-    //    ticketType.TotalSeats -= vm.Quantity;
-    //    _db.TicketTypes.Update(ticketType);
-
-    //    await _db.SaveChangesAsync();
+        // Optionally, free up the tickets
+        if (booking.Tickets != null && booking.Tickets.Any())
+        {
+            _db.Tickets.RemoveRange(booking.Tickets);
+        }
+        booking.Event.TotalSeats += booking.Quantity;
 
 
-    //    return RedirectToAction("Create", "Payment", new { bookingId = booking.BookingId });
-    //}
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Your booking has been cancelled.";
+        return RedirectToAction("MyBookings");
+    }
+
+
     // GET: Booking/MyBookings
     public async Task<IActionResult> MyBookings()
     {
@@ -210,6 +179,8 @@ public class BookingController : Controller
                     .ThenInclude(t => t.TicketType)
             .Include(c => c.Bookings)
                 .ThenInclude(b => b.Event)
+              .Include(c => c.Bookings)
+                .ThenInclude(b => b.Promotion)
             .FirstOrDefaultAsync(c => c.UserId == user.Id);
 
         if (customer == null) return RedirectToAction("Index", "Event");

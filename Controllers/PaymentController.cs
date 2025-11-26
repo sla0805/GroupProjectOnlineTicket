@@ -34,7 +34,7 @@ public class PaymentController : Controller
         var payment = new PaymentVM
         {
             BookingId = booking.BookingId,
-            Amount = booking.TotalAmount
+            Amount = booking.FinalAmount
         };
 
 
@@ -49,12 +49,10 @@ public class PaymentController : Controller
                                   .FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
         if (booking == null) return NotFound();
         decimal finalAmount = booking.TotalAmount;
-        if (!string.IsNullOrEmpty(payment.PromotionCode))
-        {
-            // Example: 10% discount if any promo code
-            finalAmount *= 0.9m;
-        }
-
+        //if (!string.IsNullOrEmpty(payment.PromotionCode))
+        //{         
+        //    finalAmount *= 0.9m;
+        //}
         var pay = new Payment
         {
             BookingId = booking.BookingId,
@@ -63,12 +61,8 @@ public class PaymentController : Controller
            
             PaymentStatus = "Paid",
             PaymentDate = DateTime.UtcNow,
-
-
         };
-
         _db.Payments.Add(pay);
-
         // Update booking status
         booking.BookingStatus = "Confirmed";
         booking.Payment = pay;
@@ -80,7 +74,7 @@ public class PaymentController : Controller
                 BookingId = booking.BookingId,
                 EventId = booking.EventId,
                 TicketTypeId = booking.Tickets.FirstOrDefault()?.TicketTypeId ?? 1,
-                QrBase64 = GenerateQrBase64($"Booking:{booking.BookingId}-Ticket:{i + 1}")
+                QrBase64 = QrHelper.GenerateQrBase64($"Booking:{booking.BookingId}-Ticket:{i + 1}")
             };
             _db.Tickets.Add(ticket);
         }
@@ -90,12 +84,5 @@ public class PaymentController : Controller
         return RedirectToAction("MyBookings", "Booking");
     }
 
-    private string GenerateQrBase64(string text)
-    {
-        using var qrGenerator = new QRCodeGenerator();
-        var qrData = qrGenerator.CreateQrCode(text, ECCLevel.Q);
-        using var qrCode = new PngByteQRCode(qrData);
-        var qrBytes = qrCode.GetGraphic(20);
-        return $"data:image/png;base64,{Convert.ToBase64String(qrBytes)}";
-    }
+   
 }
