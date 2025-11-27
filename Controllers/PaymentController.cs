@@ -45,6 +45,7 @@ public class PaymentController : Controller
     public async Task<IActionResult> Create(PaymentVM payment)
     {
         var booking = await _db.Bookings
+
                                   .Include(b => b.Tickets)
                                   .FirstOrDefaultAsync(b => b.BookingId == payment.BookingId);
         if (booking == null) return NotFound();
@@ -73,7 +74,7 @@ public class PaymentController : Controller
             {
                 BookingId = booking.BookingId,
                 EventId = booking.EventId,
-                TicketTypeId = booking.Tickets.FirstOrDefault()?.TicketTypeId ?? 1,
+                TicketTypeId = booking.TicketTypeId ?? throw new InvalidOperationException("Booking does not have a TicketTypeId assigned"),
                 QrBase64 = QrHelper.GenerateQrBase64($"Booking:{booking.BookingId}-Ticket:{i + 1}")
             };
             _db.Tickets.Add(ticket);

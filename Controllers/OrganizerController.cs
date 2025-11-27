@@ -48,6 +48,8 @@ namespace OnlineTicket.Controllers
             // Fetch all events with tickets loaded
             var events = await _context.Events
                 .Where(e => e.OrganizerId == organizerId.Value)
+                .Include(e => e.Bookings)
+            .ThenInclude(b => b.Payment)
                 .Include(e => e.TicketTypes)
                     .ThenInclude(tt => tt.Tickets)
                 .ToListAsync();
@@ -58,10 +60,19 @@ namespace OnlineTicket.Controllers
                 EventId = e.EventId,
                 Title = e.Title,
                 EventDate = e.EventDate,
-                TotalTicketsSold = e.TicketTypes.SelectMany(tt => tt.Tickets).Count(),
-                TotalRevenue = e.TicketTypes.Sum(tt => tt.Price * tt.Tickets.Count),
-                TotalSeatsAvailable = e.TotalSeats - e.TicketTypes.SelectMany(tt => tt.Tickets).Count()
-            }).ToList();
+                TotalTicketsSold = e.Bookings
+                 .Where(b => b.BookingStatus == "Confirmed")
+                 .Sum(b => b.Quantity), // only confirmed bookings
+                TotalRevenue = e.Bookings
+                    .Where(b => b.Payment != null &&
+                                (b.Payment.PaymentStatus.Equals("Completed", StringComparison.OrdinalIgnoreCase) ||
+                                 b.Payment.PaymentStatus.Equals("Paid", StringComparison.OrdinalIgnoreCase)))
+                    .Sum(b => b.Payment.Amount),
+                TotalSeatsAvailable = e.TotalSeats - e.Bookings
+                 .Where(b => b.BookingStatus == "Confirmed")
+                 .Sum(b => b.Quantity)
+            });
+
 
             // Active promotions
             var activePromotionsCount = await _context.Promotions
@@ -735,16 +746,33 @@ namespace OnlineTicket.Controllers
             return View("PromoList", promoViewModels);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetTicketTypesByEvent(int eventId)
+        {
+            var ticketTypes = await _context.TicketTypes
+                .Where(t => t.EventId == eventId)
+                .Select(t => new { ticketTypeId = t.TicketTypeId, name = t.Name })
+                .ToListAsync();
+
+            return Json(ticketTypes);
+        }
+
         // GET: /Organizer/AddPromotion
         [HttpGet]
         public async Task<IActionResult> AddPromotion()
         {
+            var orgId = await GetCurrentOrganizerIdAsync();
+
+            var events = orgId.HasValue
+                ? await _context.Events.Where(e => e.OrganizerId == orgId.Value).ToListAsync()
+                : new List<Event>();
+
             var vm = new PromotionViewModel
             {
-                Events = new SelectList(await _context.Events.ToListAsync(), "EventId", "Title"),
-                TicketTypes = new SelectList(await _context.TicketTypes.ToListAsync(), "TicketTypeId", "Name"),
-                StartDate = DateTime.Now,
-                EndDate = DateTime.Now.AddDays(7),
+                Events = new SelectList(events, "EventId", "Title"),
+                TicketTypes = new SelectList(Enumerable.Empty<SelectListItem>()),
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today.AddDays(7),
                 IsActive = true
             };
 
@@ -756,15 +784,31 @@ namespace OnlineTicket.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddPromotion(PromotionViewModel model)
         {
+            var orgId = await GetCurrentOrganizerIdAsync();
+
+            // Validate model and also ensure event belongs to this organizer
+            if (model.EventId <= 0 || (orgId.HasValue && !await _context.Events.AnyAsync(e => e.EventId == model.EventId && e.OrganizerId == orgId.Value)))
+            {
+                ModelState.AddModelError("EventId", "Please select a valid event.");
+            }
+
             if (!ModelState.IsValid)
             {
-                // repopulate SelectLists if validation fails
-                model.Events = new SelectList(await _context.Events.ToListAsync(), "EventId", "Title", model.EventId);
-                model.TicketTypes = new SelectList(await _context.TicketTypes.ToListAsync(), "TicketTypeId", "Name", model.TicketTypeId);
+                var events = orgId.HasValue
+                    ? await _context.Events.Where(e => e.OrganizerId == orgId.Value).ToListAsync()
+                    : new List<Event>();
+
+                var ticketTypes = model.EventId > 0
+                    ? await _context.TicketTypes.Where(t => t.EventId == model.EventId).ToListAsync()
+                    : new List<TicketType>();
+
+                model.Events = new SelectList(events, "EventId", "Title", model.EventId);
+                model.TicketTypes = new SelectList(ticketTypes, "TicketTypeId", "Name", model.TicketTypeId);
 
                 return View(model);
             }
 
+            // Create promotion
             var promo = new Promotion
             {
                 Name = model.Name,
@@ -784,13 +828,27 @@ namespace OnlineTicket.Controllers
             return RedirectToAction("Promotions");
         }
 
-
         // GET: /Organizer/EditPromotion/{id}
         [HttpGet]
         public async Task<IActionResult> EditPromotion(int id)
         {
+            var orgId = await GetCurrentOrganizerIdAsync();
+
             var promo = await _context.Promotions.FindAsync(id);
             if (promo == null) return NotFound();
+
+            // Ensure the event belongs to organizer
+            if (orgId.HasValue)
+            {
+                var ev = await _context.Events.FirstOrDefaultAsync(e => e.EventId == promo.EventId && e.OrganizerId == orgId.Value);
+                if (ev == null) return Forbid();
+            }
+
+            var events = orgId.HasValue
+                ? await _context.Events.Where(e => e.OrganizerId == orgId.Value).ToListAsync()
+                : new List<Event>();
+
+            var ticketTypes = await _context.TicketTypes.Where(t => t.EventId == promo.EventId).ToListAsync();
 
             var vm = new PromotionViewModel
             {
@@ -803,27 +861,47 @@ namespace OnlineTicket.Controllers
                 IsActive = promo.IsActive,
                 EventId = promo.EventId,
                 TicketTypeId = promo.TicketTypeId,
-
-                Events = new SelectList(await _context.Events.ToListAsync(), "EventId", "Title", promo.EventId),
-                TicketTypes = new SelectList(await _context.TicketTypes.ToListAsync(), "TicketTypeId", "Name", promo.TicketTypeId)
+                Events = new SelectList(events, "EventId", "Title", promo.EventId),
+                TicketTypes = new SelectList(ticketTypes, "TicketTypeId", "Name", promo.TicketTypeId)
             };
 
             return View(vm);
         }
+
         // POST: /Organizer/EditPromotion
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditPromotion(PromotionViewModel model)
         {
+            var orgId = await GetCurrentOrganizerIdAsync();
+
+            if (model.EventId <= 0 || (orgId.HasValue && !await _context.Events.AnyAsync(e => e.EventId == model.EventId && e.OrganizerId == orgId.Value)))
+            {
+                ModelState.AddModelError("EventId", "Please select a valid event.");
+            }
+
             if (!ModelState.IsValid)
             {
-                model.Events = new SelectList(await _context.Events.ToListAsync(), "EventId", "Title");
-                model.TicketTypes = new SelectList(await _context.TicketTypes.ToListAsync(), "TicketTypeId", "Name");
+                var events = orgId.HasValue
+                    ? await _context.Events.Where(e => e.OrganizerId == orgId.Value).ToListAsync()
+                    : new List<Event>();
+
+                var ticketTypes = model.EventId > 0
+                    ? await _context.TicketTypes.Where(t => t.EventId == model.EventId).ToListAsync()
+                    : new List<TicketType>();
+
+                model.Events = new SelectList(events, "EventId", "Title", model.EventId);
+                model.TicketTypes = new SelectList(ticketTypes, "TicketTypeId", "Name", model.TicketTypeId);
+
                 return View(model);
             }
 
             var promo = await _context.Promotions.FindAsync(model.PromotionId);
             if (promo == null) return NotFound();
+
+            // Ensure event belongs to organizer before saving
+            if (orgId.HasValue && !await _context.Events.AnyAsync(e => e.EventId == model.EventId && e.OrganizerId == orgId.Value))
+                return Forbid();
 
             promo.Name = model.Name;
             promo.Code = model.Code;
@@ -839,6 +917,7 @@ namespace OnlineTicket.Controllers
             TempData["SuccessMessage"] = "Promotion updated successfully!";
             return RedirectToAction("Promotions");
         }
+
 
 
         // POST: /Organizer/DeletePromotion
@@ -874,13 +953,16 @@ namespace OnlineTicket.Controllers
         }
 
 
-        //Report Chart - Monthly Ticket Sales per Ticket Type
+
         public async Task<IActionResult> OrganizerSalesReport(string organizerId)
         {
             if (string.IsNullOrEmpty(organizerId))
                 return BadRequest("Organizer not specified.");
 
+            // Eager-load required relationships
             var organizer = await _context.Organizers
+                .Include(o => o.Events)
+                    .ThenInclude(e => e.Bookings)
                 .Include(o => o.Events)
                     .ThenInclude(e => e.TicketTypes)
                         .ThenInclude(tt => tt.Tickets)
@@ -896,52 +978,89 @@ namespace OnlineTicket.Controllers
                 OrganizerName = organizer.OrganizerName
             };
 
-            foreach (var ev in organizer.Events)
-            {
-                var eventSalesData = new EventSalesData
-                {
-                    EventName = ev.Title,
-                    TotalRevenue = ev.TicketTypes.Sum(tt => tt.Price * tt.Tickets.Count),
-                    MonthlyTicketSales = new List<MonthlySales>(),
-                    TicketTypeSales = new List<TicketTypeSalesVM>()
-                };
+            var rng = new Random();
 
-                // Get all months for the event across all tickets
-                var allMonths = ev.TicketTypes
-                    .SelectMany(tt => tt.Tickets)
-                    .Where(t => t.Booking != null)
-                    .Select(t => t.Booking.CreatedAt.Month)
-                    .Distinct()
-                    .OrderBy(m => m)
+            foreach (var ev in organizer.Events ?? Enumerable.Empty<OnlineTicket.Models.Event>())
+            {
+                // Total revenue: sum FinalAmount for confirmed bookings (distinct bookings)
+                var confirmedBookings = (ev.Bookings ?? Enumerable.Empty<OnlineTicket.Models.Booking>())
+                    .Where(b => string.Equals(b.BookingStatus, "Confirmed", StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
-                // Populate TicketTypeSales
-                foreach (var tt in ev.TicketTypes)
+                var totalRevenue = confirmedBookings.Sum(b => b.FinalAmount);
+
+                // Build a unified list of (Year,Month) pairs for this event from confirmed ticket bookings
+                var monthsInfo = (ev.TicketTypes ?? Enumerable.Empty<OnlineTicket.Models.TicketType>())
+                    .SelectMany(tt => tt.Tickets ?? Enumerable.Empty<OnlineTicket.Models.Ticket>())
+                    .Where(t => t.Booking != null && string.Equals(t.Booking.BookingStatus, "Confirmed", StringComparison.OrdinalIgnoreCase))
+                    .Select(t => new { Year = t.Booking.CreatedAt.Year, Month = t.Booking.CreatedAt.Month })
+                    .Distinct()
+                    .OrderBy(x => x.Year).ThenBy(x => x.Month)
+                    .ToList();
+
+                // If no months found, add the current month as a fallback so charts don't break
+                if (!monthsInfo.Any())
                 {
-                    var ticketTypeSales = new TicketTypeSalesVM
+                    var now = DateTime.UtcNow;
+                    monthsInfo.Add(new { Year = now.Year, Month = now.Month });
+                }
+
+                // Build readable month labels; include year if multiple years present
+                var multipleYears = monthsInfo.Select(m => m.Year).Distinct().Count() > 1;
+                var monthLabels = monthsInfo
+                    .Select(m => multipleYears
+                        ? new DateTime(m.Year, m.Month, 1).ToString("MMM yyyy")
+                        : new DateTime(m.Year, m.Month, 1).ToString("MMM"))
+                    .ToList();
+
+                var ticketTypeSalesList = new List<TicketTypeSalesVM>();
+
+                // For each ticket type, build monthly sales aligned to the event-level monthLabels
+                foreach (var tt in ev.TicketTypes ?? Enumerable.Empty<OnlineTicket.Models.TicketType>())
+                {
+                    var ttSales = new TicketTypeSalesVM
                     {
-                        TicketTypeName = tt.Name,
-                        Color = $"hsl({new Random().Next(0, 360)}, 70%, 50%)", // random color
+                        TicketTypeName = tt.Name ?? "Unnamed",
+                        Color = $"hsl({rng.Next(0, 360)}, 70%, 50%)",
                         MonthlySales = new List<MonthlySales>()
                     };
 
-                    foreach (var month in allMonths)
+                    for (int i = 0; i < monthsInfo.Count; i++)
                     {
-                        var ticketsSold = tt.Tickets
-                            .Where(t => t.Booking != null && t.Booking.CreatedAt.Month == month)
-                            .Count();
+                        var mi = monthsInfo[i];
+                        var count = (tt.Tickets ?? Enumerable.Empty<OnlineTicket.Models.Ticket>())
+                            .Count(t => t.Booking != null
+                                        && string.Equals(t.Booking.BookingStatus, "Confirmed", StringComparison.OrdinalIgnoreCase)
+                                        && t.Booking.CreatedAt.Year == mi.Year
+                                        && t.Booking.CreatedAt.Month == mi.Month);
 
-                        ticketTypeSales.MonthlySales.Add(new MonthlySales
+                        ttSales.MonthlySales.Add(new MonthlySales
                         {
-                            Month = new DateTime(1, month, 1).ToString("MMM"),
-                            TicketsSold = ticketsSold
+                            Month = monthLabels[i],
+                            TicketsSold = count
                         });
                     }
 
-                    eventSalesData.TicketTypeSales.Add(ticketTypeSales);
+                    ticketTypeSalesList.Add(ttSales);
                 }
 
-                report.EventSales.Add(eventSalesData);
+                // If there are zero ticket types (unlikely), create a dummy dataset so view doesn't fail
+                if (!ticketTypeSalesList.Any())
+                {
+                    ticketTypeSalesList.Add(new TicketTypeSalesVM
+                    {
+                        TicketTypeName = "No Ticket Types",
+                        Color = $"hsl({rng.Next(0, 360)}, 70%, 50%)",
+                        MonthlySales = monthLabels.Select(m => new MonthlySales { Month = m, TicketsSold = 0 }).ToList()
+                    });
+                }
+
+                report.EventSales.Add(new EventSalesData
+                {
+                    EventName = ev.Title ?? "(Untitled)",
+                    TotalRevenue = totalRevenue,
+                    TicketTypeSales = ticketTypeSalesList
+                });
             }
 
             return View(report);

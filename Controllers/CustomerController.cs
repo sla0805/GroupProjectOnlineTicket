@@ -20,37 +20,34 @@ namespace OnlineTicket.Controllers
             _userManager = userManager;
         }
 
-        // Helper: create customer profile if missing
-        private async Task<Customer> EnsureCustomerProfileAsync()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return null;
-
-            var customer = await _db.Customers.FirstOrDefaultAsync(c => c.UserId == user.Id);
-            if (customer != null) return customer;
-
-            customer = new Customer
-            {
-                UserId = user.Id,
-                FullName = user.UserName ?? user.Email ?? "Unnamed",
-                PhoneNumber = "",
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _db.Customers.Add(customer);
-            await _db.SaveChangesAsync();
-
-            return customer;
-        }
-        //View Profile
+      
+        // GET: Customer/Profile
         public async Task<IActionResult> Profile()
         {
-            var customer = await EnsureCustomerProfileAsync();
-            if (customer == null) return NotFound();
-
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
 
-            var vm = new CustomerEditVM
+            // Try to get existing customer
+            var customer = await _db.Customers
+                .FirstOrDefaultAsync(c => c.UserId == user.Id);
+
+            if (customer == null)
+            {
+                // Create a temporary empty VM for first-time users
+                var vm = new CustomerEditVM
+                {
+                    CustomerId = 0,
+                    FullName = "",
+                    PhoneNumber = "",
+                    Email = user.Email,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                return View(vm);
+            }
+
+            // Customer exists, populate VM
+            var existingVm = new CustomerEditVM
             {
                 CustomerId = customer.CustomerId,
                 FullName = customer.FullName,
@@ -59,34 +56,55 @@ namespace OnlineTicket.Controllers
                 CreatedAt = customer.CreatedAt
             };
 
-            return View(vm);
+            return View(existingVm);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Profile(CustomerEditVM vm)
         {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
             if (!ModelState.IsValid)
             {
-                var user = await _userManager.GetUserAsync(User);
-                vm.Email = user.Email;
+                vm.Email = user.Email; // ensure email displayed
                 return View(vm);
             }
 
-            var customer = await _db.Customers.FirstOrDefaultAsync(c => c.CustomerId == vm.CustomerId);
-            if (customer == null) return NotFound();
+            // Check if customer already exists
+            var customer = await _db.Customers
+                .FirstOrDefaultAsync(c => c.UserId == user.Id);
 
-            customer.FullName = vm.FullName.Trim();
-            customer.PhoneNumber = string.IsNullOrWhiteSpace(vm.PhoneNumber) ? null : vm.PhoneNumber.Trim();
-            customer.UpdatedAt = DateTime.UtcNow;
+            if (customer == null)
+            {
+                // CREATE new profile
+                customer = new Customer
+                {
+                    UserId = user.Id,
+                    FullName = vm.FullName.Trim(),
+                    PhoneNumber = string.IsNullOrWhiteSpace(vm.PhoneNumber) ? null : vm.PhoneNumber.Trim(),
+                    CreatedAt = DateTime.UtcNow
+                };
 
-            _db.Customers.Update(customer);
+                _db.Customers.Add(customer);
+            }
+            else
+            {
+                // UPDATE existing profile
+                customer.FullName = vm.FullName.Trim();
+                customer.PhoneNumber = string.IsNullOrWhiteSpace(vm.PhoneNumber) ? null : vm.PhoneNumber.Trim();
+                customer.UpdatedAt = DateTime.UtcNow;
+
+                _db.Customers.Update(customer);
+            }
+
             await _db.SaveChangesAsync();
 
-            TempData["ProfileSuccess"] = "Profile updated successfully.";
+            TempData["ProfileSuccess"] = "Profile saved successfully.";
             return RedirectToAction(nameof(Profile));
         }
-
         //Dashboard
         public async Task<IActionResult> Dashboard()
         {
@@ -124,23 +142,7 @@ namespace OnlineTicket.Controllers
         }
 
 
-        ////Search Events
-        //public IActionResult BrowseEvents(string search = "")
-        //{
-        //    var events = _db.Events
-        //        .Include(e => e.TicketTypes)
-        //        .Include(e => e.Organizer)
-        //        .Include(e => e.Venue)
-        //        .AsQueryable();
-
-        //    if (!string.IsNullOrEmpty(search))
-        //    {
-        //        events = events.Where(e => e.Title.Contains(search) || e.Venue.Name.Contains(search));
-        //    }
-
-        //    return View(events.ToList());
-        //}
-
+       
       
     
 

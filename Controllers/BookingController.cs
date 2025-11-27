@@ -105,6 +105,7 @@ public class BookingController : Controller
         {
             EventId = vm.EventId,
             CustomerId = customer.CustomerId,
+            TicketTypeId =vm.TicketTypeId,
             Quantity = vm.Quantity,
             TotalAmount = totalAmount,
             DiscountAmount = discountAmount,  

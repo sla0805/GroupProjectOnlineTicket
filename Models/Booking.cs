@@ -13,7 +13,8 @@ namespace OnlineTicket.Models
 
         public int EventId { get; set; }
         public Event Event { get; set; }
-
+        public int? TicketTypeId { get; set; }
+        public TicketType TicketType { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         
         public int Quantity { get; set; }

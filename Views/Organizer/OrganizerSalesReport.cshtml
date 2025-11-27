@@ -1,4 +1,5 @@
-﻿@model OnlineTicket.ViewModels.OrganizerSalesReportVM
+﻿@using OnlineTicket.ViewModels
+@model OnlineTicket.ViewModels.OrganizerSalesReportVM
 @{
     ViewData["Title"] = "Organizer Sales Report";
 }
@@ -12,54 +13,80 @@
             Sales Report for @Model.OrganizerName
         </h1>
         <p class="text-gray-600 text-lg">
-            View monthly ticket sales per ticket type and total revenue breakdown.
+            Monthly ticket sales breakdown per event and per ticket type.
         </p>
         <a asp-action="Dashboard"
            asp-route-organizerId="@Model.OrganizerId"
            class="inline-block mt-4 text-indigo-600 hover:text-indigo-800 font-medium">
-            ← Back to Your Dashboard
+            ← Back to Dashboard
         </a>
     </div>
 
     <!-- Event Sales Charts Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
         @foreach (var ev in Model.EventSales)
         {
             var safeId = "chart_" + Guid.NewGuid().ToString("N");
 
-            <div class="bg-white p-6 rounded-xl shadow">
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all">
                 <h2 class="text-2xl font-semibold text-gray-800 mb-3 flex items-center">
                     <i class="fa-solid fa-ticket mr-2 text-indigo-600"></i> @ev.EventName
                 </h2>
 
+                <!-- Total Revenue -->
                 <p class="text-gray-700 mb-4 font-medium">
                     Total Revenue:
                     <span class="text-green-600 font-bold">@ev.TotalRevenue.ToString("C")</span>
                 </p>
 
+                <!-- Ticket Type Legend -->
+                <div class="mb-4">
+                    <h3 class="text-md font-semibold text-gray-700 mb-2">Ticket Types</h3>
+                    <div class="space-y-1">
+                        @foreach (var tt in ev.TicketTypeSales)
+                        {
+                            <div class="flex items-center">
+                                <span class="inline-block w-4 h-4 rounded mr-2" style="background:@tt.Color;"></span>
+                                <span class="text-gray-700">@tt.TicketTypeName</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Chart -->
                 <canvas id="@safeId" class="h-52 w-full"></canvas>
 
+                @* Prepare months and datasets safely *@
                 @{
-                    // Collect all months across ticket types
                     var months = ev.TicketTypeSales
                     .SelectMany(tt => tt.MonthlySales)
                     .Select(ms => ms.Month)
                     .Distinct()
                     .ToList();
 
-                    // Build dataset array for Chart.js
-                    var datasets = ev.TicketTypeSales.Select(tt => new
+                    if (!months.Any())
                     {
-                        label = tt.TicketTypeName,
-                        data = months.Select(m => tt.MonthlySales.FirstOrDefault(x => x.Month == m)?.TicketsSold ?? 0).ToArray(),
-                        backgroundColor = tt.Color,
-                        borderColor = tt.Color,
-                        borderWidth = 1
-                    }).ToArray();
+                        months = new List<string> { "No Data" };
+                        foreach (var tt in ev.TicketTypeSales)
+                        {
+                            foreach (var m in months)
+                                if (!tt.MonthlySales.Any(ms => ms.Month == m))
+                                    tt.MonthlySales.Add(new MonthlySales { Month = m, TicketsSold = 0 });
+                        }
+                    }
 
-                    // Serialize to JSON
-                    var monthsJson = System.Text.Json.JsonSerializer.Serialize(months);
-                    var datasetsJson = System.Text.Json.JsonSerializer.Serialize(datasets);
+                    // Build dataset JS objects manually for Chart.js
+                    var datasetsJs = string.Join(",", ev.TicketTypeSales.Select(tt =>
+                    {
+                        var dataArray = months.Select(m =>
+                    tt.MonthlySales.FirstOrDefault(ms => ms.Month == m)?.TicketsSold ?? 0
+                    );
+                        return $"{{ label: '{tt.TicketTypeName}', data: [{string.Join(",", dataArray)}], backgroundColor: '{tt.Color}', borderColor: '{tt.Color}', borderWidth: 1 }}";
+                    }));
+                    datasetsJs = $"[{datasetsJs}]";
+
+                    var monthsJs = System.Text.Json.JsonSerializer.Serialize(months);
                 }
 
                 <script>
@@ -67,19 +94,24 @@
                         const ctx = document.getElementById("@safeId");
                         if (!ctx) return;
 
-                        const chart = new Chart(ctx, {
+                        new Chart(ctx, {
                             type: 'bar',
                             data: {
-                                labels: @Html.Raw(monthsJson),
-                                datasets: @Html.Raw(datasetsJson)
-                                                },
+                                labels: @Html.Raw(monthsJs),
+                                datasets: @Html.Raw(datasetsJs)
+                            },
                             options: {
                                 responsive: true,
                                 plugins: {
-                                    legend: { display: true }
+                                    legend: { display: true },
+                                    tooltip: { mode: 'index', intersect: false }
                                 },
                                 scales: {
-                                    y: { beginAtZero: true }
+                                    x: { stacked: false },
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: { precision: 0 }
+                                    }
                                 }
                             }
                         });
@@ -88,7 +120,6 @@
             </div>
         }
     </div>
-
 </div>
 
 @section Scripts {

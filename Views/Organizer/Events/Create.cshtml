@@ -40,7 +40,11 @@
         <!-- Event Date -->
         <div>
             <label class="block text-gray-700 font-medium">Event Date & Time</label>
-            <input asp-for="EventDate" type="datetime-local" step="60" class="w-full border rounded p-2 mt-1" />
+            <input asp-for="EventDate"
+                   type="datetime-local"
+                   step="60"
+                   value="@(Model.EventDate.ToString("yyyy-MM-ddTHH:mm"))"
+                   class="w-full border rounded p-2 mt-1" />
             <span asp-validation-for="EventDate" class="text-red-500 text-sm"></span>
         </div>
 

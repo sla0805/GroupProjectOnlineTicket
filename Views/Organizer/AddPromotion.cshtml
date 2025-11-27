@@ -1,5 +1,4 @@
 ﻿@model OnlineTicket.ViewModels.PromotionViewModel
-
 @{
     ViewData["Title"] = "Add Promotion";
 }
@@ -14,77 +13,62 @@
             <button type="button" class="ml-4 font-bold" onclick="this.parentElement.style.display='none'">×</button>
         </div>
     }
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="bg-red-100 text-red-800 p-3 rounded mb-4 flex justify-between items-center">
-            <span>@TempData["ErrorMessage"]</span>
-            <button type="button" class="ml-4 font-bold" onclick="this.parentElement.style.display='none'">×</button>
-        </div>
-    }
 
     <form asp-action="AddPromotion" method="post" class="space-y-4">
         @Html.AntiForgeryToken()
 
-        <!-- Name -->
         <div>
             <label asp-for="Name" class="block text-gray-700 font-medium">Promotion Name</label>
             <input asp-for="Name" class="w-full border rounded p-2 mt-1" />
             <span asp-validation-for="Name" class="text-red-500 text-sm"></span>
         </div>
 
-        <!-- Code -->
         <div>
             <label asp-for="Code" class="block text-gray-700 font-medium">Promo Code</label>
             <input asp-for="Code" class="w-full border rounded p-2 mt-1" />
             <span asp-validation-for="Code" class="text-red-500 text-sm"></span>
         </div>
 
-        <!-- Discount -->
         <div>
             <label asp-for="DiscountPercentage" class="block text-gray-700 font-medium">Discount (%)</label>
             <input asp-for="DiscountPercentage" type="number" min="1" max="100" class="w-full border rounded p-2 mt-1" />
             <span asp-validation-for="DiscountPercentage" class="text-red-500 text-sm"></span>
         </div>
 
-        <!-- Event -->
         <div>
             <label asp-for="EventId" class="block text-gray-700 font-medium">Event</label>
-            <select asp-for="EventId" asp-items="Model.Events" class="form-select w-full border rounded p-2 mt-1">
+            <select asp-for="EventId" asp-items="Model.Events" id="EventId" class="w-full border rounded p-2 mt-1">
                 <option value="">-- Select Event --</option>
             </select>
             <span asp-validation-for="EventId" class="text-red-500 text-sm"></span>
         </div>
 
-        <!-- Ticket Type -->
         <div>
             <label asp-for="TicketTypeId" class="block text-gray-700 font-medium">Ticket Type</label>
-            <select asp-for="TicketTypeId" asp-items="Model.TicketTypes" class="form-select w-full border rounded p-2 mt-1">
+            <select asp-for="TicketTypeId" asp-items="Model.TicketTypes" id="TicketTypeId" class="w-full border rounded p-2 mt-1">
                 <option value="">-- Select Ticket Type --</option>
             </select>
             <span asp-validation-for="TicketTypeId" class="text-red-500 text-sm"></span>
         </div>
 
-        <!-- Start Date -->
-        <div>
-            <label asp-for="StartDate" class="block text-gray-700 font-medium">Start Date</label>
-            <input asp-for="StartDate" type="date" class="w-full border rounded p-2 mt-1" />
-            <span asp-validation-for="StartDate" class="text-red-500 text-sm"></span>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label asp-for="StartDate" class="block text-gray-700 font-medium">Start Date</label>
+                <input asp-for="StartDate" type="date" class="w-full border rounded p-2 mt-1" />
+                <span asp-validation-for="StartDate" class="text-red-500 text-sm"></span>
+            </div>
+            <div>
+                <label asp-for="EndDate" class="block text-gray-700 font-medium">End Date</label>
+                <input asp-for="EndDate" type="date" class="w-full border rounded p-2 mt-1" />
+                <span asp-validation-for="EndDate" class="text-red-500 text-sm"></span>
+            </div>
         </div>
 
-        <!-- End Date -->
-        <div>
-            <label asp-for="EndDate" class="block text-gray-700 font-medium">End Date</label>
-            <input asp-for="EndDate" type="date" class="w-full border rounded p-2 mt-1" />
-            <span asp-validation-for="EndDate" class="text-red-500 text-sm"></span>
-        </div>
-
-        <!-- Is Active -->
         <div class="flex items-center gap-2 mt-2">
             <input asp-for="IsActive" type="checkbox" class="rounded" />
             <label asp-for="IsActive" class="text-gray-700 font-medium">Active</label>
         </div>
 
-        <!-- Buttons -->
         <div class="flex justify-end mt-6 gap-2">
             <a asp-action="Promotions" class="px-4 py-2 border rounded text-gray-700 hover:bg-gray-100">Cancel</a>
             <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Save</button>
@@ -94,4 +78,27 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // load ticket types when event changes
+        document.getElementById("EventId")?.addEventListener("change", function () {
+            const eventId = this.value;
+            const ddl = document.getElementById("TicketTypeId");
+            ddl.innerHTML = '<option value="">-- Select Ticket Type --</option>';
+
+            if (!eventId) return;
+
+            fetch(`/Organizer/GetTicketTypesByEvent?eventId=${eventId}`)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(t => {
+                        const opt = document.createElement("option");
+                        opt.value = t.ticketTypeId;
+                        opt.text = t.name;
+                        ddl.appendChild(opt);
+                    });
+                })
+                .catch(err => console.error(err));
+        });
+    </script>
 }

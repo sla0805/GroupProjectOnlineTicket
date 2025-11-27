@@ -96,7 +96,13 @@ public class ApplicationDbContext : IdentityDbContext
             .WithOne(t => t.Booking)
             .HasForeignKey(t => t.BookingId)
             .OnDelete(DeleteBehavior.Cascade);
+        //Booking --> ticket type
 
+        builder.Entity<Booking>()
+            .HasOne(b => b.TicketType)
+            .WithMany()
+            .HasForeignKey(b => b.TicketTypeId)
+            .OnDelete(DeleteBehavior.Restrict);
         // Booking -> Payment
         builder.Entity<Booking>()
             .HasOne(b => b.Payment)
