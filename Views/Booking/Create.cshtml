@@ -114,7 +114,8 @@
                             <div class="grid grid-cols-1 gap-4">
                                 @foreach (var p in Model.AvailablePromotions)
                                 {
-                                    <div class="flex items-center border rounded-lg p-3 hover:shadow-md transition-shadow duration-200">
+                                    <div class="flex items-center border rounded-lg p-3 hover:shadow-md transition-shadow duration-200 promotion-item"
+                                         data-ticket-type="@p.TicketTypeId">
                                         <input type="radio"
                                                asp-for="PromotionId"
                                                value="@p.PromotionId"

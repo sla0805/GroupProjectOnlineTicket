@@ -592,6 +592,7 @@ namespace OnlineTicket.Controllers
             // Verify the event belongs to this organizer
             var ev = await _context.Events
                 .Include(e => e.TicketTypes)
+                  .ThenInclude(tt => tt.Tickets)
                 .FirstOrDefaultAsync(e => e.EventId == eventId && e.OrganizerId == organizerId.Value);
 
             if (ev == null) return NotFound();
@@ -642,6 +643,7 @@ namespace OnlineTicket.Controllers
             // Verify the event belongs to this organizer
             var ev = await _context.Events
                 .Include(e => e.TicketTypes)
+                    .ThenInclude(tt => tt.Tickets)
                 .FirstOrDefaultAsync(e => e.EventId == eventId && e.OrganizerId == organizerId.Value);
 
             if (ev == null) return NotFound();
